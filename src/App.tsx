@@ -413,9 +413,9 @@ const App: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
         {[
-          { amount: 1000, cost: '$4.99', label: 'Field Kit', icon: 'fa-briefcase', desc: 'Basic data pack for minor leads.' },
-          { amount: 3000, cost: '$9.99', label: 'Wiretap Access', hot: true, icon: 'fa-tower-cell', desc: 'Deep-dive intelligence for complex cases.' },
-          { amount: 7500, cost: '$19.99', label: 'Classified Archive', icon: 'fa-vault', desc: 'Full-spectrum clearance for elite agents.' }
+          { amount: 1000, cost: 'dt 4.99', label: 'Field Kit', icon: 'fa-briefcase', desc: 'Basic data pack for minor leads.' },
+          { amount: 3000, cost: 'dt 9.99', label: 'Wiretap Access', hot: true, icon: 'fa-tower-cell', desc: 'Deep-dive intelligence for complex cases.' },
+          { amount: 7500, cost: 'dt 19.99', label: 'Classified Archive', icon: 'fa-vault', desc: 'Full-spectrum clearance for elite agents.' }
         ].map((p, i) => (
           <div 
             key={i} 
@@ -472,7 +472,7 @@ const App: React.FC = () => {
                 <h3 className="text-2xl font-bold text-white mb-2">Monthly Intel</h3>
                 <p className="text-gray-500 text-sm italic font-serif">Perfect for a single operation.</p>
                 <ul className="mt-8 space-y-4">
-                  {['Unlimited Case Access', 'Priority Gemini Pro Processing', '50% Intel Point Discount', 'Exclusive Badges'].map((feat, i) => (
+                  {['Unlimited Case Access', '50% Intel Point Discount', 'Exclusive Badges'].map((feat, i) => (
                     <li key={i} className="flex items-center gap-3 text-xs text-gray-300">
                       <i className="fa-solid fa-check text-yellow-600"></i> {feat}
                     </li>
@@ -480,7 +480,7 @@ const App: React.FC = () => {
                 </ul>
               </div>
               <div className="space-y-4">
-                <div className="text-3xl font-mono font-bold text-white">$9.99<span className="text-xs text-gray-600 ml-2">/month</span></div>
+                <div className="text-3xl font-mono font-bold text-white">DT 9.99<span className="text-xs text-gray-600 ml-2">/month</span></div>
                 <button 
                   onClick={() => togglePremium('Monthly')}
                   className="w-full py-4 bg-white text-black font-black rounded-xl text-xs uppercase tracking-widest hover:bg-gray-200 transition-all"
@@ -496,7 +496,7 @@ const App: React.FC = () => {
                 <h3 className="text-2xl font-bold text-white mb-2">Annual Clearance</h3>
                 <p className="text-gray-500 text-sm italic font-serif">For the professional agent.</p>
                 <ul className="mt-8 space-y-4">
-                  {['Everything in Monthly', '2 Free Trial Cases for Friends', 'Early Access to New Files', 'Veto Suspect Privilege'].map((feat, i) => (
+                  {['Everything in Monthly', 'Early Access to New Files', 'Veto Suspect Privilege'].map((feat, i) => (
                     <li key={i} className="flex items-center gap-3 text-xs text-gray-300">
                       <i className="fa-solid fa-check text-yellow-600"></i> {feat}
                     </li>
@@ -504,7 +504,7 @@ const App: React.FC = () => {
                 </ul>
               </div>
               <div className="space-y-4">
-                <div className="text-3xl font-mono font-bold text-white">$79.99<span className="text-xs text-gray-600 ml-2">/year</span></div>
+                <div className="text-3xl font-mono font-bold text-white">DT 29.99<span className="text-xs text-gray-600 ml-2">/year</span></div>
                 <button 
                   onClick={() => togglePremium('Yearly')}
                   className="w-full py-4 bg-yellow-600 text-black font-black rounded-xl text-xs uppercase tracking-widest hover:bg-yellow-500 transition-all shadow-xl"
