@@ -1,6 +1,7 @@
 
 export type SuspectID = string;
 export type AccessLevel = 'Free' | 'Premium' | 'Expert';
+export type Language = 'en' | 'ar' | 'fr';
 
 export interface Suspect {
   id: SuspectID;
