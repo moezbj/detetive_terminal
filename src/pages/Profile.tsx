@@ -1,13 +1,11 @@
 
 import React from 'react';
 import { useGame } from '../hooks/useGame';
-import { UI_TEXT } from '../../translations';
 import { BADGE_DEFINITIONS } from '../constants';
 
 const Profile: React.FC = () => {
   const { user, lang } = useGame();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const t = UI_TEXT[lang];
+   
   const isRTL = lang === 'ar';
 
   return (

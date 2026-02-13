@@ -1,13 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
 
 import React, { useState } from 'react';
 import { useGame } from '../hooks/useGame';
-import { UI_TEXT } from '../../translations';
 
 const Shop: React.FC = () => {
-  const { lang, user, setUser } = useGame();
+  const { setUser } = useGame();
   const [isProcessing, setIsProcessing] = useState(false);
-  const t = UI_TEXT[lang];
 
   const handlePurchase = (amount: number) => {
     setIsProcessing(true);

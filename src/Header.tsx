@@ -1,17 +1,14 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useGame } from "./hooks/useGame";
 import { UI_TEXT } from '../translations';
 
 const Header: React.FC = () => {
   const { user, lang, setLang, logout } = useGame();
-  const location = useLocation();
   const t = UI_TEXT[lang];
   const isRTL = lang === 'ar';
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const isAtCase = location.pathname.startsWith('/case/');
 
   return (
     <nav className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5 p-4 shadow-2xl">

@@ -91,8 +91,8 @@ export async function createCase(newCase: CrimeCase) {
 }
 
 export async function getRealtimeLeaderboard() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { data, error } = await supabase
+   
+  const { data } = await supabase
     .from('profiles')
     .select('name, cases_solved, total_points, full_stats')
     .order('total_points', { ascending: false })

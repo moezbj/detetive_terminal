@@ -1,17 +1,18 @@
 import { useGame } from "../hooks/useGame";
 import type { CrimeCase, CaseProgress } from "../types";
-import { useState } from "react";
 import { UI_TEXT } from "../../translations";
 
 interface Progress {
   currentCase: CrimeCase;
   currentProgress: CaseProgress;
   requestHint: () => void;
+  isLoadingHint: boolean;
 }
 const ProgressBanner = ({
   currentCase,
   currentProgress,
   requestHint,
+  isLoadingHint
 }: Progress) => {
   const { lang, user } = useGame();
 
@@ -23,8 +24,7 @@ const ProgressBanner = ({
     currentProgress.interrogatedSuspectIds.length +
     currentProgress.discoveredClueIds.length;
   const percentage = Math.round((completedItems / totalItems) * 100);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isLoading, setIsLoading] = useState(false);
+   
 
   if (!currentCase || !currentProgress) return null;
 
@@ -54,11 +54,11 @@ const ProgressBanner = ({
         <div className="flex gap-4 items-center">
           <button
             onClick={requestHint}
-            disabled={isLoading}
+            disabled={isLoadingHint}
             className={`flex items-center gap-3 bg-red-700 hover:bg-red-600 px-6 py-2 rounded-lg transition-all transform active:scale-95 group shadow-lg ${isRTL ? "flex-row-reverse" : ""}`}
           >
             <i
-              className={`fa-solid fa-brain text-xs ${isLoading ? "animate-spin" : ""}`}
+              className={`fa-solid fa-brain text-xs ${isLoadingHint ? "animate-spin" : ""}`}
             ></i>
             <span className="text-[10px] font-black uppercase tracking-widest">
               {t.acquireIntel} ({user.isPremium ? "50" : "250"})

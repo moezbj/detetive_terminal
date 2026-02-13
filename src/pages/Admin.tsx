@@ -7,8 +7,8 @@ import { createCase } from '../../supabaseService';
 import type { CrimeCase } from '../types';
 
 const Admin: React.FC = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { user, isSyncing } = useGame();
+   
+  const { user } = useGame();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from "react";
+import { useState } from "react";
 import { useGame } from "../hooks/useGame";
 
 interface paywallModal {
@@ -7,8 +7,7 @@ interface paywallModal {
   setShowPaywall: (showPaywall: boolean) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const PaywallModal = ({ setUser, setShowPaywall }: paywallModal) => {
+const PaywallModal = ({ setShowPaywall }: paywallModal) => {
   const { lang } = useGame();
   const isRTL = lang === "ar";
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);

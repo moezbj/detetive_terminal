@@ -148,7 +148,6 @@ export async function evaluateAccusation(
  */
 import type {
   SuspectID,
-  Message,
   CrimeCase,
   CaseProgress,
   Language,
@@ -253,7 +252,6 @@ const accusatoryKeywords: Record<string, string[]> = {
 export async function interrogateSuspect(
   currentCase: CrimeCase,
   suspectId: SuspectID,
-  history: Message[],
   userPrompt: string,
   language: Language = "en",
 ): Promise<string> {
@@ -304,16 +302,6 @@ export async function interrogateSuspect(
   }
 
   return response;
-}
-
- 
-export async function generateSpeech(
-  text: string,
-  language: Language = "en",
-): Promise<string> {
-  // Since this is now local, we can't actually generate speech
-  // Return a placeholder or mock audio data
-  return "mock_audio_data_placeholder";
 }
 
 export async function generateHint(

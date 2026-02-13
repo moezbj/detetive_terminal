@@ -1,16 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
 
 import React, { useEffect, useState } from 'react';
-import { useGame } from '../hooks/useGame';
 import { getRealtimeLeaderboard } from '../../supabaseService';
-import { UI_TEXT } from '../../translations';
 
 const Leaderboard: React.FC = () => {
-  const { lang } = useGame();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const t = UI_TEXT[lang];
 
   useEffect(() => {
     const fetch = async () => {

@@ -1,5 +1,12 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
-import { Routes, Route, useParams, useNavigate, Link, Navigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  useParams,
+  useNavigate,
+  Link,
+  Navigate,
+} from "react-router-dom";
 import { useSpeech } from "react-text-to-speech";
 
 import { useGame } from "../hooks/useGame";
@@ -86,7 +93,8 @@ const CaseView: React.FC = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedClueId, setSelectedClueId] = useState<string | null>(null);
-   const [activeHint, setActiveHint] = useState<string | null>(null);
+  const [activeHint, setActiveHint] = useState<string | null>(null);
+  const [isLoadingHint, setIsLoadingHint] = useState(false);
 
   const [verdict, setVerdict] = useState<{
     correct: boolean;
@@ -168,9 +176,7 @@ const CaseView: React.FC = () => {
       const reply = await interrogateSuspect(
         currentCase,
         activeSuspect,
-        history,
         currentInput,
-        lang,
       );
       setChatHistory((prev) => ({
         ...prev,
@@ -221,7 +227,7 @@ const CaseView: React.FC = () => {
       return;
     }
 
-    setIsLoading(true);
+    setIsLoadingHint(true);
     try {
       const hint = await generateHint(currentCase, progress, lang);
       setActiveHint(hint);
@@ -235,7 +241,7 @@ const CaseView: React.FC = () => {
     } catch (error) {
       console.error(error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingHint(false);
     }
   };
   if (!currentCase)
@@ -243,7 +249,12 @@ const CaseView: React.FC = () => {
 
   return (
     <div className="flex flex-col animate-fadeIn">
-      <ProgressBanner currentProgress={progress} currentCase={currentCase} requestHint={requestHint} />
+      <ProgressBanner
+        currentProgress={progress}
+        currentCase={currentCase}
+        requestHint={requestHint}
+        isLoadingHint={isLoadingHint}
+      />
       <div className="bg-neutral-900/80 border-b border-white/5 p-4 flex justify-center gap-2 md:gap-4 sticky top-[73px] z-20 backdrop-blur-md">
         <Link
           to={`/case/${caseId}/file`}
