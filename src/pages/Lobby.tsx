@@ -82,17 +82,26 @@ const Lobby: React.FC = () => {
               <div
                 key={c.id}
                 onClick={() => {
-                  if (!user?.isPremium) {
-                    const isAlreadyStarted = user?.stats.casesPlayed.includes(
+                  if (!user?.isPremium && c.accessLevel !== "Free") {
+                  /*   const isAlreadyStarted = user?.stats.casesPlayed.includes(
                       c.id,
                     );
+                    console.log(
+                      "c",
+                      c,
+                      c.accessLevel,
+                      isAlreadyStarted,
+                      freeSlotsRemaining,
+                    );
+
                     if (
                       c.accessLevel !== "Free" ||
                       (!isAlreadyStarted && freeSlotsRemaining <= 0)
                     ) {
-                      setShowPaywall(true);
                       return;
-                    }
+                    } */
+                                          setShowPaywall(true);
+
                   }
                   navigate(`/case/${c.id}`);
                 }}

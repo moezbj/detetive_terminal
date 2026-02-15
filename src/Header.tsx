@@ -83,7 +83,7 @@ console.log('ud',  user)
           >
             <i className="fa-solid fa-user-secret"></i>
           </Link>
-          {user?.id === "local_user" ? (
+          {user?.id ? (
             <button
               onClick={logout}
               className="px-4 py-1.5 bg-neutral-900 border border-white/10 text-gray-500 rounded font-black text-[10px] uppercase"
