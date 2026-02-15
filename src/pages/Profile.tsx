@@ -15,10 +15,10 @@ const Profile: React.FC = () => {
           <i className="fa-solid fa-user-secret"></i>
         </div>
         <div className="space-y-4 text-center md:text-left">
-          <h2 className="text-6xl font-serif font-bold text-white tracking-tighter">{user.name}</h2>
+          <h2 className="text-6xl font-serif font-bold text-white tracking-tighter">{user?.name}</h2>
           <div className="flex gap-4 justify-center md:justify-start">
-            <span className="px-4 py-1.5 bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-full">{user.stats.rank}</span>
-            {user.isPremium && <span className="px-4 py-1.5 bg-yellow-600 text-black text-[10px] font-black uppercase tracking-widest rounded-full">Elite Member</span>}
+            <span className="px-4 py-1.5 bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-full">{user?.stats.rank}</span>
+            {user?.isPremium && <span className="px-4 py-1.5 bg-yellow-600 text-black text-[10px] font-black uppercase tracking-widest rounded-full">Elite Member</span>}
           </div>
         </div>
       </div>
@@ -26,11 +26,11 @@ const Profile: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="p-10 bg-neutral-900 border border-white/5 rounded-[2.5rem] shadow-xl space-y-2">
           <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Cases Resolved</p>
-          <p className="text-6xl font-serif text-white">{user.stats.casesSolved}</p>
+          <p className="text-6xl font-serif text-white">{user?.stats.casesSolved}</p>
         </div>
         <div className="p-10 bg-neutral-900 border border-white/5 rounded-[2.5rem] shadow-xl space-y-2">
           <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Intelligence Points</p>
-          <p className="text-6xl font-serif text-yellow-600">{user.stats.totalPoints.toLocaleString()}</p>
+          <p className="text-6xl font-serif text-yellow-600">{user?.stats.totalPoints.toLocaleString()}</p>
         </div>
       </div>
 
@@ -40,7 +40,7 @@ const Profile: React.FC = () => {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {BADGE_DEFINITIONS.map(badge => {
-            const hasBadge = user.stats.badges.includes(badge.name);
+            const hasBadge = user?.stats.badges.includes(badge.name);
             return (
               <div key={badge.name} className={`p-6 rounded-2xl border transition-all flex items-center gap-6 ${hasBadge ? 'bg-black/40 border-white/10 opacity-100' : 'bg-neutral-950 border-white/5 opacity-20 grayscale'}`}>
                 <i className={`fa-solid ${badge.icon} text-4xl ${hasBadge ? badge.color : 'text-gray-700'}`}></i>

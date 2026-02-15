@@ -86,13 +86,7 @@ const Lobby: React.FC = () => {
                   /*   const isAlreadyStarted = user?.stats.casesPlayed.includes(
                       c.id,
                     );
-                    console.log(
-                      "c",
-                      c,
-                      c.accessLevel,
-                      isAlreadyStarted,
-                      freeSlotsRemaining,
-                    );
+                   s
 
                     if (
                       c.accessLevel !== "Free" ||
