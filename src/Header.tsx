@@ -7,7 +7,6 @@ const Header: React.FC = () => {
   const { user, lang, setLang, logout } = useGame();
   const t = UI_TEXT[lang];
   const isRTL = lang === "ar";
-console.log('ud',  user)
   return (
     <nav className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5 p-4 shadow-2xl">
       <div

@@ -23,8 +23,6 @@ const Auth: React.FC = () => {
 
       if (result.data.user) {
         const cloudProfile = await getProfile(result.data.user.id);
-                  console.log('cloudProfile.data.role', cloudProfile)
-
         if (cloudProfile.data) {
           setUser({
             id: result.data.user.id,
