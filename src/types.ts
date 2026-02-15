@@ -27,9 +27,10 @@ export interface TimelineEntry {
 
 export interface CaseProgress {
   discoveredClueIds: string[];
-  interrogatedSuspectIds: string[];
+  interrogatedSuspectIds: SuspectID[];
   unlockedHintIds: string[];
   isCompleted: boolean;
+  unreadClueIds?: string[];
 }
 
 export interface CrimeCase {

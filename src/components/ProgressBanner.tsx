@@ -61,7 +61,7 @@ const ProgressBanner = ({
               className={`fa-solid fa-brain text-xs ${isLoadingHint ? "animate-spin" : ""}`}
             ></i>
             <span className="text-[10px] font-black uppercase tracking-widest">
-              {t.acquireIntel} ({user.isPremium ? "50" : "250"})
+              {t.acquireIntel} ({user?.isPremium ? "50" : "250"})
             </span>
           </button>
         </div>

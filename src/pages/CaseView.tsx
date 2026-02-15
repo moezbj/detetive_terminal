@@ -17,7 +17,7 @@ import {
   generateHint,
 } from "../services/geminiService";
 
-import type { CrimeCase, SuspectID } from "../types";
+import type { CrimeCase, SuspectID, CaseProgress } from "../types";
 import ClueDetailModal from "../Modal/ClueModal";
 import { UI_TEXT } from "../../translations";
 import ProgressBanner from "../components/ProgressBanner";
@@ -121,10 +121,18 @@ const CaseView: React.FC = () => {
       </div>
     );
 
-  const progress = user.stats.caseProgress[currentCase.id] || {
+  const progress: {
+    discoveredClueIds: string[];
+    interrogatedSuspectIds: SuspectID[];
+    isCompleted: boolean;
+    unreadClueIds?: string[];
+    unlockedHintIds: string[];
+  } = user?.stats?.caseProgress[currentCase.id] || {
     discoveredClueIds: [],
     interrogatedSuspectIds: [],
     isCompleted: false,
+    unreadClueIds: [],
+    unlockedHintIds: [],
   };
   const discoverClue = (clueId: string) => {
     if (!progress?.discoveredClueIds.includes(clueId)) {
@@ -134,18 +142,22 @@ const CaseView: React.FC = () => {
     }
     setSelectedClueId(clueId);
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateProgress = (updates: any) => {
-    setUser((prev) => ({
-      ...prev,
-      stats: {
-        ...prev.stats,
-        caseProgress: {
-          ...prev.stats.caseProgress,
-          [currentCase.id]: { ...progress, ...updates },
-        },
-      },
-    }));
+  const updateProgress = (updates: Partial<CaseProgress>) => {
+    if (user && currentCase.id) {
+      setUser((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          stats: {
+            ...prev.stats,
+            caseProgress: {
+              ...prev.stats.caseProgress,
+              [currentCase.id]: { ...progress, ...updates },
+            },
+          },
+        };
+      });
+    }
   };
 
   const handleSendMessage = async () => {
@@ -201,16 +213,19 @@ const CaseView: React.FC = () => {
       setVerdict(res);
       if (res.correct) {
         updateProgress({ isCompleted: true });
-        setUser((prev) => ({
-          ...prev,
-          stats: {
-            ...prev.stats,
-            casesSolved: prev.stats.casesSolved + 1,
-            totalPoints:
-              prev.stats.totalPoints +
-              (currentCase.difficulty === "Hard" ? 1200 : 600),
-          },
-        }));
+        setUser((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            stats: {
+              ...prev.stats,
+              casesSolved: prev.stats.casesSolved + 1,
+              totalPoints:
+                prev.stats.totalPoints +
+                (currentCase.difficulty === "Hard" ? 1200 : 600),
+            },
+          };
+        });
       }
     } catch (error) {
       console.error(error);
@@ -220,7 +235,7 @@ const CaseView: React.FC = () => {
   };
 
   const requestHint = async () => {
-    if (!currentCase || !progress || isLoading) return;
+    if (!currentCase || !progress || isLoading || !user) return;
     const hintCost = user.isPremium ? 50 : 250;
     if (user.stats.totalPoints < hintCost) {
       Navigate({ to: "/shop" });
@@ -231,13 +246,16 @@ const CaseView: React.FC = () => {
     try {
       const hint = await generateHint(currentCase, progress, lang);
       setActiveHint(hint);
-      setUser((prev) => ({
-        ...prev,
-        stats: {
-          ...prev.stats,
-          totalPoints: prev.stats.totalPoints - hintCost,
-        },
-      }));
+      setUser((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          stats: {
+            ...prev.stats,
+            totalPoints: prev.stats.totalPoints - hintCost,
+          },
+        };
+      });
     } catch (error) {
       console.error(error);
     } finally {
