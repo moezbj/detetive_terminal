@@ -2,8 +2,8 @@ import { createContext } from "react";
 import type { User, CrimeCase, Language, Message } from "../types.ts";
 
 export interface GameContextType {
-  user: User;
-  setUser: React.Dispatch<React.SetStateAction<User>>;
+  user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   cases: CrimeCase[];
   isCasesLoading: boolean;
   lang: Language;
@@ -17,4 +17,6 @@ export interface GameContextType {
   >;
 }
 
-export const GameContext = createContext<GameContextType | undefined>(undefined);
+export const GameContext = createContext<GameContextType | undefined>(
+  undefined,
+);

@@ -31,8 +31,8 @@ export async function getProfile(userId: string) {
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
-    .eq('id', userId)
-    .single();
+    .eq('user_auth', userId)
+    .maybeSingle();
   return { data, error };
 }
 
@@ -46,7 +46,6 @@ export async function getCases(): Promise<CrimeCase[]> {
     console.error('Error fetching cases:', error);
     return [];
   }
-
   if (data) {
     return data.map(c => ({
       id: c.id,

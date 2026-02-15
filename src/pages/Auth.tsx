@@ -16,22 +16,24 @@ const Auth: React.FC = () => {
     try {
       let result;
       if (authForm.isLogin) {
-        result = await supabase.auth.signInWithPassword({ email: authForm.email, password: authForm.password });
+        result = await supabase.auth.signInWithPassword({ email: authForm.email, password: authForm.password, });
       } else {
-        result = await supabase.auth.signUp({ email: authForm.email, password: authForm.password });
+        result = await supabase.auth.signUp({ email: authForm.email, password: authForm.password, });
       }
 
       if (result.data.user) {
         const cloudProfile = await getProfile(result.data.user.id);
+                  console.log('cloudProfile.data.role', cloudProfile)
+
         if (cloudProfile.data) {
           setUser({
             id: result.data.user.id,
             name: cloudProfile.data.name,
             isPremium: cloudProfile.data.is_premium,
-            isAdmin: cloudProfile.data.role === 'admin' || !!cloudProfile.data.is_admin,
+            isAdmin: !!cloudProfile.data.is_admin,
             stats: cloudProfile.data.full_stats
           });
-          navigate(cloudProfile.data.role === 'admin' ? '/admin' : '/');
+          navigate(cloudProfile.data.is_admin ? '/admin' : '/');
         } else {
           // New user logic
           navigate('/');
