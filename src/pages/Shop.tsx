@@ -15,7 +15,7 @@ const Shop: React.FC = () => {
           ...prev,
           stats: {
             ...prev.stats,
-            totalPoints: prev.stats.totalPoints + amount,
+            total_points: prev.stats.total_points + amount,
           },
         };
       });

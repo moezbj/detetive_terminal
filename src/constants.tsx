@@ -172,8 +172,8 @@ export const CASES: CrimeCase[] = [
 ];
 
 export const LEADERBOARD_DATA: LeaderboardEntry[] = [
-  { name: 'Detective Holmes', casesSolved: 42, points: 12500, badges: ['Gold Gavel', 'Master Mind', 'Night Owl'] },
-  { name: 'Poirot\'s Ghost', casesSolved: 38, points: 11200, badges: ['The Grey Cell', 'Logic King'] }
+  { name: 'Detective Holmes', cases_solved: 42, points: 12500, badges: ['Gold Gavel', 'Master Mind', 'Night Owl'] },
+  { name: 'Poirot\'s Ghost', cases_solved: 38, points: 11200, badges: ['The Grey Cell', 'Logic King'] }
 ];
 
 export const BADGE_DEFINITIONS = [

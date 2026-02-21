@@ -1,7 +1,6 @@
-
 export type SuspectID = string;
-export type AccessLevel = 'Free' | 'Premium' | 'Expert';
-export type Language = 'en' | 'ar' | 'fr';
+export type AccessLevel = "Free" | "Premium" | "Expert";
+export type Language = "en" | "ar" | "fr";
 
 export interface Suspect {
   id: SuspectID;
@@ -38,7 +37,7 @@ export interface CrimeCase {
   title: string;
   subtitle: string;
   teaser: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  difficulty: "Easy" | "Medium" | "Hard";
   backgroundImage: string;
   victim: string;
   description: string;
@@ -51,12 +50,13 @@ export interface CrimeCase {
 }
 
 export interface UserStats {
-  casesSolved: number;
-  totalPoints: number;
+  id: string;
+  cases_solved: number;
+  total_points: number;
   badges: string[];
   rank: string;
-  casesPlayed: string[];
-  caseProgress: Record<string, CaseProgress>;
+  cases_played: string[];
+  case_progress: Record<string, CaseProgress>;
 }
 
 export interface User {
@@ -69,14 +69,25 @@ export interface User {
 
 export interface LeaderboardEntry {
   name: string;
-  casesSolved: number;
+  cases_solved: number;
   points: number;
   badges: string[];
 }
 
 export interface Message {
-  role: 'user' | 'model';
+  role: "user" | "model";
   text: string;
 }
 
-export type GameView = 'lobby' | 'intro' | 'casefile' | 'interrogation' | 'evidence' | 'accusation' | 'leaderboard' | 'profile' | 'auth' | 'shop' | 'admin';
+export type GameView =
+  | "lobby"
+  | "intro"
+  | "casefile"
+  | "interrogation"
+  | "evidence"
+  | "accusation"
+  | "leaderboard"
+  | "profile"
+  | "auth"
+  | "shop"
+  | "admin";

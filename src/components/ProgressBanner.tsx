@@ -21,12 +21,13 @@ const ProgressBanner = ({
 
   const totalItems = currentCase.suspects.length + currentCase.clues.length;
   const completedItems =
-    currentProgress.interrogatedSuspectIds.length +
-    currentProgress.discoveredClueIds.length;
-  const percentage = Math.round((completedItems / totalItems) * 100);
+      (currentProgress.interrogatedSuspectIds?.length ?? 0) +
+      (currentProgress.discoveredClueIds?.length ?? 0);
+  const percentage =
+    totalItems === 0 ? 0 : Math.round((completedItems / totalItems) * 100);
    
 
-  if (!currentCase || !currentProgress) return null;
+
 
   return (
     <div className="bg-neutral-900/60 border-b border-white/5 p-3 px-8 sticky top-[73px] z-40 backdrop-blur-md">

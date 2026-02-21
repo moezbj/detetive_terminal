@@ -50,12 +50,13 @@ export interface CrimeCase {
 }
 
 export interface UserStats {
-  casesSolved: number;
-  totalPoints: number;
+  id: string;
+  cases_solved: number;
+  total_points: number;
   badges: string[];
   rank: string;
-  casesPlayed: string[];
-  caseProgress: Record<string, CaseProgress>;
+  cases_played: string[];
+  case_progress: Record<string, CaseProgress>;
 }
 
 export interface User {
@@ -68,7 +69,7 @@ export interface User {
 
 export interface LeaderboardEntry {
   name: string;
-  casesSolved: number;
+  cases_solved: number;
   points: number;
   badges: string[];
 }

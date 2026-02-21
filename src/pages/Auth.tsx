@@ -33,7 +33,7 @@ const Auth: React.FC = () => {
       if (result.data.user) {
         const cloudProfile = await getProfile(result.data.user.id);
         if (cloudProfile.data) {
-          const getStats = await getUserStats(cloudProfile.data.stats);
+          const getStats = await getUserStats(result.data.user.id);
           console.log('getStats',getStats.data)
           setUser({
             id: result.data.user.id,

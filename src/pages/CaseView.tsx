@@ -6,9 +6,9 @@ import {
   useNavigate,
   Link,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import { useSpeech } from "react-text-to-speech";
-
 import { useGame } from "../hooks/useGame";
 
 import {
@@ -21,9 +21,12 @@ import type { CrimeCase, SuspectID, CaseProgress } from "../types";
 import ClueDetailModal from "../Modal/ClueModal";
 import { UI_TEXT } from "../../translations";
 import ProgressBanner from "../components/ProgressBanner";
+import { getUserStats, payForCase } from "../../supabaseService";
 
 const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
   const navigate = useNavigate();
+  const { user, setUser } = useGame();
+
   const { speechStatus, start, pause, stop } = useSpeech({
     text: caseData.teaser,
     pitch: 1,
@@ -37,7 +40,26 @@ const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
     highlightMode: "word",
     enableDirectives: true,
   });
-
+  const pay = async () => {
+    if (!user?.stats) return null;
+    if (user.stats.cases_played.includes(caseData.id)) navigate("file");
+    const isStillSpent = user.stats.total_points >= 300;
+    if (!isStillSpent) return "Not enough points";
+    const newCase = await payForCase(
+      user.id,
+      user.stats,
+      user.stats.id,
+      caseData.id,
+      user?.stats.total_points - 300,
+    );
+    console.log("newCase", newCase, user);
+    if (newCase === "updated") {
+      await getUserStats(user.id).then((res) => {
+        setUser({ ...user, stats: res.data });
+      });
+      navigate("file");
+    }
+  };
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-8 relative overflow-hidden bg-black">
       <div className="absolute inset-0 z-0">
@@ -72,7 +94,7 @@ const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
             </button>
           </div>
           <button
-            onClick={() => navigate("file")}
+            onClick={() => pay()}
             className="px-16 py-5 bg-red-700 hover:bg-red-600 text-white font-black rounded-2xl uppercase tracking-widest shadow-2xl"
           >
             Access File
@@ -85,6 +107,7 @@ const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
 
 const CaseView: React.FC = () => {
   const { caseId } = useParams();
+  const location = useLocation();
   const {
     cases,
     user,
@@ -116,6 +139,26 @@ const CaseView: React.FC = () => {
     [cases, caseId],
   );
 
+  const progress = useMemo(() => {
+    if (!user || !currentCase)
+      return {
+        discoveredClueIds: [],
+        interrogatedSuspectIds: [],
+        isCompleted: false,
+        unreadClueIds: [],
+        unlockedHintIds: [],
+      };
+    return user.stats?.case_progress
+      ? user.stats?.case_progress[currentCase.id]
+      : {
+          discoveredClueIds: [],
+          interrogatedSuspectIds: [],
+          isCompleted: false,
+          unreadClueIds: [],
+          unlockedHintIds: [],
+        };
+  }, [user, currentCase]);
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -129,21 +172,6 @@ const CaseView: React.FC = () => {
       </div>
     );
 
-  const progress: {
-    discoveredClueIds: string[];
-    interrogatedSuspectIds: SuspectID[];
-    isCompleted: boolean;
-    unreadClueIds?: string[];
-    unlockedHintIds: string[];
-  } = user?.stats?.caseProgress
-    ? user?.stats?.caseProgress[currentCase.id]
-    : {
-        discoveredClueIds: [],
-        interrogatedSuspectIds: [],
-        isCompleted: false,
-        unreadClueIds: [],
-        unlockedHintIds: [],
-      };
   const discoverClue = (clueId: string) => {
     if (!progress?.discoveredClueIds.includes(clueId)) {
       updateProgress({
@@ -156,13 +184,23 @@ const CaseView: React.FC = () => {
     if (user && currentCase.id) {
       await setUser((prev) => {
         if (!prev) return null;
+        const currentCaseProgress = prev.stats?.case_progress
+          ? prev.stats?.case_progress[currentCase.id]
+          : {
+              discoveredClueIds: [],
+              interrogatedSuspectIds: [],
+              isCompleted: false,
+              unreadClueIds: [],
+              unlockedHintIds: [],
+            };
+
         return {
           ...prev,
           stats: {
             ...prev.stats,
-            caseProgress: {
-              ...prev.stats.caseProgress,
-              [currentCase.id]: { ...progress, ...updates },
+            case_progress: {
+              ...prev.stats.case_progress,
+              [currentCase.id]: { ...currentCaseProgress, ...updates },
             },
           },
         };
@@ -186,10 +224,10 @@ const CaseView: React.FC = () => {
 
     setChatHistory((prev) => ({ ...prev, [suspectKey]: newHistory }));
 
-    if (!progress.interrogatedSuspectIds.includes(activeSuspect)) {
+    if (!progress?.interrogatedSuspectIds?.includes(activeSuspect)) {
       updateProgress({
         interrogatedSuspectIds: [
-          ...progress.interrogatedSuspectIds,
+          ...(progress.interrogatedSuspectIds || []),
           activeSuspect,
         ],
       });
@@ -231,9 +269,9 @@ const CaseView: React.FC = () => {
             ...prev,
             stats: {
               ...prev.stats,
-              casesSolved: prev.stats.casesSolved + 1,
-              totalPoints:
-                prev.stats.totalPoints +
+              cases_solved: prev.stats.cases_solved + 1,
+              total_points:
+                prev.stats.total_points +
                 (currentCase.difficulty === "Hard" ? 1200 : 600),
             },
           };
@@ -249,7 +287,7 @@ const CaseView: React.FC = () => {
   const requestHint = async () => {
     if (!currentCase || !progress || isLoading || !user) return;
     const hintCost = user.isPremium ? 50 : 250;
-    if (user.stats.totalPoints < hintCost) {
+    if (user.stats.total_points < hintCost) {
       Navigate({ to: "/shop" });
       return;
     }
@@ -264,7 +302,7 @@ const CaseView: React.FC = () => {
           ...prev,
           stats: {
             ...prev.stats,
-            totalPoints: prev.stats.totalPoints - hintCost,
+            total_points: prev.stats.total_points - hintCost,
           },
         };
       });
@@ -274,44 +312,53 @@ const CaseView: React.FC = () => {
       setIsLoadingHint(false);
     }
   };
+  const showTab =
+    location.pathname.endsWith("/file") ||
+    location.pathname.endsWith("/interrogate") ||
+    location.pathname.endsWith("/evidence") ||
+    location.pathname.endsWith("/accusation");
   if (!currentCase)
     return <div className="p-20 text-center text-red-600">Case not found.</div>;
-
   return (
     <div className="flex flex-col animate-fadeIn">
-      <ProgressBanner
-        currentProgress={progress}
-        currentCase={currentCase}
-        requestHint={requestHint}
-        isLoadingHint={isLoadingHint}
-      />
-      <div className="bg-neutral-900/80 border-b border-white/5 p-4 flex flex-wrap justify-center gap-2 md:gap-4 sticky top-[73px] z-20 backdrop-blur-md">
-        <Link
-          to={`/case/${caseId}/file`}
-          className={`text-[10px] font-black uppercase px-4 py-2 rounded transition-all ${window.location.pathname.endsWith("/file") ? "text-white bg-red-950/50" : "text-gray-500 hover:text-white"}`}
-        >
-          File
-        </Link>
+      {showTab && (
+        <ProgressBanner
+          currentProgress={progress}
+          currentCase={currentCase}
+          requestHint={requestHint}
+          isLoadingHint={isLoadingHint}
+        />
+      )}
 
-        <Link
-          to={`/case/${caseId}/evidence`}
-          className={`text-[10px] font-black uppercase px-4 py-2 rounded transition-all ${window.location.pathname.endsWith("/evidence") ? "text-white bg-red-950/50" : "text-gray-500 hover:text-white"}`}
-        >
-          Evidence
-        </Link>
-        <Link
-          to={`/case/${caseId}/interrogate`}
-          className={`text-[10px] font-black uppercase px-4 py-2 rounded transition-all ${window.location.pathname.endsWith("/interrogate") ? "text-white bg-red-950/50" : "text-gray-500 hover:text-white"}`}
-        >
-          Interrogate
-        </Link>
-        <Link
-          to={`/case/${caseId}/accusation`}
-          className="text-[10px] font-black uppercase text-white bg-red-700 px-6 py-2 rounded shadow-lg hover:bg-red-600 transition-all"
-        >
-          Verdict
-        </Link>
-      </div>
+      {showTab && (
+        <div className="bg-neutral-900/80 border-b border-white/5 p-4 flex flex-wrap justify-center gap-2 md:gap-4 sticky top-[73px] z-20 backdrop-blur-md">
+          <Link
+            to={`/case/${caseId}/file`}
+            className={`text-[10px] font-black uppercase px-4 py-2 rounded transition-all ${window.location.pathname.endsWith("/file") ? "text-white bg-red-950/50" : "text-gray-500 hover:text-white"}`}
+          >
+            File
+          </Link>
+
+          <Link
+            to={`/case/${caseId}/evidence`}
+            className={`text-[10px] font-black uppercase px-4 py-2 rounded transition-all ${window.location.pathname.endsWith("/evidence") ? "text-white bg-red-950/50" : "text-gray-500 hover:text-white"}`}
+          >
+            Evidence
+          </Link>
+          <Link
+            to={`/case/${caseId}/interrogate`}
+            className={`text-[10px] font-black uppercase px-4 py-2 rounded transition-all ${window.location.pathname.endsWith("/interrogate") ? "text-white bg-red-950/50" : "text-gray-500 hover:text-white"}`}
+          >
+            Interrogate
+          </Link>
+          <Link
+            to={`/case/${caseId}/accusation`}
+            className="text-[10px] font-black uppercase text-white bg-red-700 px-6 py-2 rounded shadow-lg hover:bg-red-600 transition-all"
+          >
+            Verdict
+          </Link>
+        </div>
+      )}
       {activeHint && (
         <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-50 max-w-2xl w-[90%] bg-red-950/95 backdrop-blur-2xl border border-red-500/50 p-12 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.9)] animate-fadeIn">
           <div
@@ -427,7 +474,7 @@ const CaseView: React.FC = () => {
                         {s.role}
                       </div>
                     </div>
-                    {progress.interrogatedSuspectIds.includes(s.id) && (
+                    {progress?.interrogatedSuspectIds?.includes(s.id) && (
                       <i className="fa-solid fa-microphone text-[8px] text-red-600 animate-pulse"></i>
                     )}
                   </button>
@@ -563,6 +610,7 @@ const CaseView: React.FC = () => {
                   selectedClueId={selectedClueId}
                   selectedCase={currentCase}
                   setSelectedClueId={setSelectedClueId}
+                  syncCaseToCloud={syncCaseToCloud}
                 />
               )}
             </div>

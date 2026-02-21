@@ -26,11 +26,11 @@ const Profile: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="p-10 bg-neutral-900 border border-white/5 rounded-[2.5rem] shadow-xl space-y-2">
           <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Cases Resolved</p>
-          <p className="text-6xl font-serif text-white">{user?.stats.casesSolved}</p>
+          <p className="text-6xl font-serif text-white">{user?.stats.cases_solved}</p>
         </div>
         <div className="p-10 bg-neutral-900 border border-white/5 rounded-[2.5rem] shadow-xl space-y-2">
           <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Intelligence Points</p>
-          <p className="text-6xl font-serif text-yellow-600">{user?.stats.totalPoints.toLocaleString()}</p>
+          <p className="text-6xl font-serif text-yellow-600">{user?.stats.total_points}</p>
         </div>
       </div>
 

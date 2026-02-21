@@ -13,7 +13,7 @@ const Lobby: React.FC = () => {
 
   const freeSlotsRemaining = useMemo(() => {
     if (!user) return 0;
-    const freePlayed = user.stats?.casesPlayed?.filter((id) => {
+    const freePlayed = user.stats?.cases_played?.filter((id) => {
       const c = cases.find((cc) => cc.id === id);
       return c?.accessLevel === "Free";
     }).length;
@@ -77,13 +77,13 @@ const Lobby: React.FC = () => {
         {cases
           .sort((a, b) => b.difficulty.localeCompare(a.difficulty))
           .map((c) => {
-            const isSolved = user?.stats?.caseProgress ? user?.stats?.caseProgress[c.id]?.isCompleted : false;
+            const isSolved = user?.stats?.case_progress ? user?.stats?.case_progress[c.id]?.isCompleted : false;
             return (
               <div
                 key={c.id}
                 onClick={() => {
                   if (!user?.isPremium && c.accessLevel !== "Free") {
-                    /*   const isAlreadyStarted = user?.stats.casesPlayed.includes(
+                    /*   const isAlreadyStarted = user?.stats.cases_played.includes(
                       c.id,
                     );
                    s

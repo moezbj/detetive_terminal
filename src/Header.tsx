@@ -7,7 +7,6 @@ const Header: React.FC = () => {
   const { user, lang, setLang, logout } = useGame();
   const t = UI_TEXT[lang];
   const isRTL = lang === "ar";
-
   return (
     <nav className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5 p-4 shadow-2xl">
       <div
@@ -35,7 +34,7 @@ const Header: React.FC = () => {
           >
             <i className="fa-solid fa-database text-yellow-500 text-xs"></i>
             <span className="text-xs font-mono text-yellow-500 font-bold">
-              {user?.stats?.totalPoints?.toLocaleString()}{" "}
+              {user?.stats?.total_points}
               <span className="text-gray-600 ml-1">{t.intel}</span>
             </span>
           </Link>}

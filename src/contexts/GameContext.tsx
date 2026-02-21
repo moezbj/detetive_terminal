@@ -5,7 +5,12 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import type { User, CrimeCase, Language, Message } from "../types.ts";
+import type {
+  User,
+  CrimeCase,
+  Language,
+  Message,
+} from "../types.ts";
 import { getCases, saveProfile, saveCaseProgress } from "../../supabaseService";
 import { GameContext } from "./GameContextExports";
 
@@ -50,7 +55,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   const syncCaseToCloud = useCallback(async () => {
     if (!user) return undefined;
 
-
     // Simple debounce/comparison to avoid redundant calls
     const userString = JSON.stringify(user);
     if (userString === lastSyncRef.current) return;
@@ -58,10 +62,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsSyncing(true);
     try {
       // 2. Sync individual case progress entries that changed
-      const caseIds = Object.keys(user.stats.caseProgress);
-
+      const caseIds = Object.keys(user.stats?.case_progress || {});
       for (const cid of caseIds) {
-        await saveCaseProgress(user.id, cid, user.stats.caseProgress[cid]);
+        await saveCaseProgress(user.id, cid, user.stats.case_progress[cid]);
       }
 
       lastSyncRef.current = userString;
@@ -110,7 +113,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       logout,
       chatHistory,
       setChatHistory,
-      syncCaseToCloud
+      syncCaseToCloud,
     }),
     [
       user,

@@ -6,11 +6,13 @@ interface ClueModal {
   selectedClueId: string | null;
   selectedCase: CrimeCase | null;
   setSelectedClueId: (d: string | null) => void;
+  syncCaseToCloud: () => void;
 }
 const ClueDetailModal = ({
   selectedCase,
   selectedClueId,
   setSelectedClueId,
+  syncCaseToCloud,
 }: ClueModal) => {
   const { lang } = useGame();
 
@@ -26,7 +28,10 @@ const ClueDetailModal = ({
         className={`max-w-2xl w-full bg-neutral-900 border border-white/5 rounded-[3rem] overflow-hidden shadow-2xl relative ${isRTL ? "text-right" : ""}`}
       >
         <button
-          onClick={() => setSelectedClueId(null)}
+          onClick={() => {
+            setSelectedClueId(null);
+            syncCaseToCloud();
+          }}
           className={`absolute top-10 ${isRTL ? "left-10" : "right-10"} text-gray-500 hover:text-red-500 transition-colors z-20`}
         >
           <i className="fa-solid fa-xmark text-xl"></i>
@@ -54,7 +59,10 @@ const ClueDetailModal = ({
           </p>
 
           <button
-            onClick={() => setSelectedClueId(null)}
+            onClick={() => {
+              setSelectedClueId(null);
+              syncCaseToCloud();
+            }}
             className="px-12 py-4 bg-white/5 border border-white/10 text-gray-500 hover:text-white hover:bg-white/10 rounded-full text-[10px] font-black uppercase tracking-widest transition-all"
           >
             {isRTL ? "العودة للمحفوظات" : "Return to Archives"}
