@@ -7,10 +7,11 @@ const Header: React.FC = () => {
   const { user, lang, setLang, logout } = useGame();
   const t = UI_TEXT[lang];
   const isRTL = lang === "ar";
+
   return (
     <nav className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5 p-4 shadow-2xl">
       <div
-        className={`max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-4 ${isRTL ? "flex-row-reverse" : ""}`}
+        className={`max-w-6xl mx-auto flex  justify-between items-center gap-4 ${isRTL ? "flex-row-reverse" : ""}`}
       >
         <div
           className={`flex items-center gap-6 ${isRTL ? "flex-row-reverse" : ""}`}
@@ -28,22 +29,21 @@ const Header: React.FC = () => {
             </h1>
           </Link>
 
-          <Link
+         {user && <Link
             to="/shop"
             className={`flex items-center gap-3 bg-neutral-900/50 px-4 py-1.5 rounded-full border border-white/10 hover:bg-neutral-800 transition-all ${isRTL ? "flex-row-reverse" : ""}`}
           >
             <i className="fa-solid fa-database text-yellow-500 text-xs"></i>
             <span className="text-xs font-mono text-yellow-500 font-bold">
-              {user?.stats?.totalPoints.toLocaleString()}{" "}
+              {user?.stats?.totalPoints?.toLocaleString()}{" "}
               <span className="text-gray-600 ml-1">{t.intel}</span>
             </span>
-          </Link>
+          </Link>}
 
           <div
             className={`flex gap-2 bg-neutral-900/40 p-1 rounded-lg border border-white/5 ${isRTL ? "flex-row-reverse" : ""}`}
           >
             {["en", "fr", "ar"].map((l) => (
-               
               <button
                 key={l}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,13 +75,15 @@ const Header: React.FC = () => {
           >
             <i className="fa-solid fa-ranking-star"></i>
           </Link>
-          <Link
-            to="/profile"
-            title="Profile"
-            className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-red-500 transition-colors"
-          >
-            <i className="fa-solid fa-user-secret"></i>
-          </Link>
+          {user && (
+            <Link
+              to="/profile"
+              title="Profile"
+              className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-red-500 transition-colors"
+            >
+              <i className="fa-solid fa-user-secret"></i>
+            </Link>
+          )}
           {user?.id ? (
             <button
               onClick={logout}
@@ -100,6 +102,7 @@ const Header: React.FC = () => {
               {t.sync}
             </Link>
           )}
+          
         </div>
       </div>
     </nav>

@@ -13,7 +13,7 @@ const Lobby: React.FC = () => {
 
   const freeSlotsRemaining = useMemo(() => {
     if (!user) return 0;
-    const freePlayed = user.stats.casesPlayed.filter((id) => {
+    const freePlayed = user.stats?.casesPlayed?.filter((id) => {
       const c = cases.find((cc) => cc.id === id);
       return c?.accessLevel === "Free";
     }).length;
@@ -60,7 +60,7 @@ const Lobby: React.FC = () => {
         <div className="inline-block px-4 py-1 border border-red-900/50 rounded-full bg-red-900/10 text-[10px] font-black text-red-600 uppercase tracking-[0.3em] mb-4">
           Central Intelligence Bureau
         </div>
-        <h1 className="text-8xl font-serif font-bold tracking-tighter text-white leading-none">
+        <h1 className="text-5xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-serif font-bold tracking-tighter text-white leading-none">
           {t.lobbyTitle}
         </h1>
         <p className="text-gray-500 font-serif italic text-2xl max-w-2xl mx-auto">
@@ -77,13 +77,13 @@ const Lobby: React.FC = () => {
         {cases
           .sort((a, b) => b.difficulty.localeCompare(a.difficulty))
           .map((c) => {
-            const isSolved = user?.stats.caseProgress[c.id]?.isCompleted;
+            const isSolved = user?.stats?.caseProgress ? user?.stats?.caseProgress[c.id]?.isCompleted : false;
             return (
               <div
                 key={c.id}
                 onClick={() => {
                   if (!user?.isPremium && c.accessLevel !== "Free") {
-                  /*   const isAlreadyStarted = user?.stats.casesPlayed.includes(
+                    /*   const isAlreadyStarted = user?.stats.casesPlayed.includes(
                       c.id,
                     );
                    s
@@ -94,8 +94,7 @@ const Lobby: React.FC = () => {
                     ) {
                       return;
                     } */
-                                          setShowPaywall(true);
-
+                    setShowPaywall(true);
                   }
                   navigate(`/case/${c.id}`);
                 }}

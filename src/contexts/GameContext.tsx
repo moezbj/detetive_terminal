@@ -1,6 +1,12 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import type { User, CrimeCase, Language, Message } from "../types.ts";
-import { getCases, saveProfile } from "../../supabaseService";
+import { getCases, saveProfile, saveCaseProgress } from "../../supabaseService";
 import { GameContext } from "./GameContextExports";
 
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -13,6 +19,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isCasesLoading, setIsCasesLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [chatHistory, setChatHistory] = useState<Record<string, Message[]>>({});
+  const lastSyncRef = useRef<string>("");
 
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem("detective_user");
@@ -30,9 +37,38 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const syncToCloud = useCallback(async () => {
-    if(!user) return undefined
+    if (!user) return undefined;
     if (user?.id === "local_user") {
-    await saveProfile(user.id, user.name, user.stats, user.isPremium);
+      await saveProfile(user.id, user.name, user.isPremium);
+    }
+  }, [user]);
+
+  /**
+   * Comprehensive cloud sync that updates both full profile
+   * and specific case progress entries in the database.
+   */
+  const syncCaseToCloud = useCallback(async () => {
+    if (!user) return undefined;
+
+
+    // Simple debounce/comparison to avoid redundant calls
+    const userString = JSON.stringify(user);
+    if (userString === lastSyncRef.current) return;
+
+    setIsSyncing(true);
+    try {
+      // 2. Sync individual case progress entries that changed
+      const caseIds = Object.keys(user.stats.caseProgress);
+
+      for (const cid of caseIds) {
+        await saveCaseProgress(user.id, cid, user.stats.caseProgress[cid]);
+      }
+
+      lastSyncRef.current = userString;
+    } catch (e) {
+      console.error("Cloud synchronization failure:", e);
+    } finally {
+      setIsSyncing(false);
     }
   }, [user]);
 
@@ -74,8 +110,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       logout,
       chatHistory,
       setChatHistory,
+      syncCaseToCloud
     }),
-    [user, cases, isCasesLoading, lang, isSyncing, chatHistory, syncToCloud],
+    [
+      user,
+      cases,
+      isCasesLoading,
+      lang,
+      isSyncing,
+      chatHistory,
+      syncToCloud,
+      syncCaseToCloud,
+    ],
   );
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

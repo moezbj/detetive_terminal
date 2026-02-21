@@ -47,10 +47,10 @@ const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
         />
       </div>
       <div className="relative z-10 max-w-4xl text-center space-y-12 animate-fadeIn">
-        <h1 className="text-9xl font-serif font-bold text-white tracking-tighter leading-none">
+        <h1 className="text-5xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-serif font-bold tracking-tighter text-white leading-none">
           {caseData.title}
         </h1>
-        <p className="text-3xl text-gray-500 font-serif italic leading-relaxed">
+        <p className="text-2xl text-gray-500 font-serif italic leading-relaxed">
           "{caseData.teaser}"
         </p>
         <div className="flex flex-col items-center gap-8">
@@ -85,7 +85,15 @@ const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
 
 const CaseView: React.FC = () => {
   const { caseId } = useParams();
-  const { cases, user, setUser, lang, chatHistory, setChatHistory } = useGame();
+  const {
+    cases,
+    user,
+    setUser,
+    lang,
+    chatHistory,
+    setChatHistory,
+    syncCaseToCloud,
+  } = useGame();
   const isRTL = lang === "ar";
   const t = UI_TEXT[lang];
 
@@ -127,13 +135,15 @@ const CaseView: React.FC = () => {
     isCompleted: boolean;
     unreadClueIds?: string[];
     unlockedHintIds: string[];
-  } = user?.stats?.caseProgress[currentCase.id] || {
-    discoveredClueIds: [],
-    interrogatedSuspectIds: [],
-    isCompleted: false,
-    unreadClueIds: [],
-    unlockedHintIds: [],
-  };
+  } = user?.stats?.caseProgress
+    ? user?.stats?.caseProgress[currentCase.id]
+    : {
+        discoveredClueIds: [],
+        interrogatedSuspectIds: [],
+        isCompleted: false,
+        unreadClueIds: [],
+        unlockedHintIds: [],
+      };
   const discoverClue = (clueId: string) => {
     if (!progress?.discoveredClueIds.includes(clueId)) {
       updateProgress({
@@ -142,9 +152,9 @@ const CaseView: React.FC = () => {
     }
     setSelectedClueId(clueId);
   };
-  const updateProgress = (updates: Partial<CaseProgress>) => {
+  const updateProgress = async (updates: Partial<CaseProgress>) => {
     if (user && currentCase.id) {
-      setUser((prev) => {
+      await setUser((prev) => {
         if (!prev) return null;
         return {
           ...prev,
@@ -157,6 +167,7 @@ const CaseView: React.FC = () => {
           },
         };
       });
+      syncCaseToCloud();
     }
   };
 
@@ -213,6 +224,7 @@ const CaseView: React.FC = () => {
       setVerdict(res);
       if (res.correct) {
         updateProgress({ isCompleted: true });
+
         setUser((prev) => {
           if (!prev) return null;
           return {
@@ -273,24 +285,25 @@ const CaseView: React.FC = () => {
         requestHint={requestHint}
         isLoadingHint={isLoadingHint}
       />
-      <div className="bg-neutral-900/80 border-b border-white/5 p-4 flex justify-center gap-2 md:gap-4 sticky top-[73px] z-20 backdrop-blur-md">
+      <div className="bg-neutral-900/80 border-b border-white/5 p-4 flex flex-wrap justify-center gap-2 md:gap-4 sticky top-[73px] z-20 backdrop-blur-md">
         <Link
           to={`/case/${caseId}/file`}
           className={`text-[10px] font-black uppercase px-4 py-2 rounded transition-all ${window.location.pathname.endsWith("/file") ? "text-white bg-red-950/50" : "text-gray-500 hover:text-white"}`}
         >
           File
         </Link>
-        <Link
-          to={`/case/${caseId}/interrogate`}
-          className={`text-[10px] font-black uppercase px-4 py-2 rounded transition-all ${window.location.pathname.endsWith("/interrogate") ? "text-white bg-red-950/50" : "text-gray-500 hover:text-white"}`}
-        >
-          Interrogate
-        </Link>
+
         <Link
           to={`/case/${caseId}/evidence`}
           className={`text-[10px] font-black uppercase px-4 py-2 rounded transition-all ${window.location.pathname.endsWith("/evidence") ? "text-white bg-red-950/50" : "text-gray-500 hover:text-white"}`}
         >
           Evidence
+        </Link>
+        <Link
+          to={`/case/${caseId}/interrogate`}
+          className={`text-[10px] font-black uppercase px-4 py-2 rounded transition-all ${window.location.pathname.endsWith("/interrogate") ? "text-white bg-red-950/50" : "text-gray-500 hover:text-white"}`}
+        >
+          Interrogate
         </Link>
         <Link
           to={`/case/${caseId}/accusation`}

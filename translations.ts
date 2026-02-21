@@ -8,7 +8,7 @@ export const UI_TEXT: Record<Language, any> = {
     lobbyTitle: "Detective Terminal",
     lobbySubtitle: '"There is nothing more deceptive than an obvious fact."',
     intel: "INTEL",
-    sync: "Cloud Sync",
+    sync: "Login",
     logout: "Logout",
     availableClearance: "Available Clearances",
     eliteMembership: "Elite Membership",
@@ -89,14 +89,14 @@ export const UI_TEXT: Record<Language, any> = {
     profile: "ملف المحقق",
     achievements: "إنجازات المكتب",
     shopTitle: "اكتساب المعلومات",
-    syncCloud: "مزامنة مع السحابة"
+    syncCloud: " تسجيل "
   },
   fr: {
     terminal: "Terminal.Détective",
     lobbyTitle: "Terminal Détective",
     lobbySubtitle: '"Rien n\'est plus trompeur qu\'un fait évident."',
     intel: "INTEL",
-    sync: "Sync Cloud",
+    sync: "Connexion",
     logout: "Déconnexion",
     availableClearance: "Accès Disponibles",
     eliteMembership: "Membre Élite",

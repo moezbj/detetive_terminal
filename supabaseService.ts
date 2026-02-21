@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
-import type { UserStats, CrimeCase } from "./src/types";
+import type { CrimeCase } from "./src/types";
+import type { CaseProgress } from "./types";
 
 // Assuming these are injected via environment or handled by the platform
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -11,17 +12,13 @@ if (!supabaseUrl || !supabaseKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
-export async function saveProfile(userId: string, name: string, stats: UserStats, isPremium: boolean) {
+export async function saveProfile(userId: string, name: string, isPremium: boolean) {
   const { error } = await supabase
     .from('profiles')
     .upsert({
       id: userId,
       name: name,
-      cases_solved: stats.casesSolved,
-      total_points: stats.totalPoints,
-      rank: stats.rank,
       is_premium: isPremium,
-      full_stats: stats,
       updated_at: new Date()
     });
   return { error };
@@ -31,7 +28,15 @@ export async function getProfile(userId: string) {
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
-    .eq('user_auth', userId)
+    .eq('id', userId)
+    .maybeSingle();
+  return { data, error };
+}
+export async function getUserStats(userId: string) {
+  const { data, error } = await supabase
+    .from('user_stats')
+    .select('*')
+    .eq('id', userId)
     .maybeSingle();
   return { data, error };
 }
@@ -67,6 +72,27 @@ export async function getCases(): Promise<CrimeCase[]> {
   return [];
 }
 
+export async function getCaseProgress(userId: string, caseId: string): Promise<CaseProgress | null> {
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from('case_progress')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('case_id', caseId)
+    .single();
+
+  if (error || !data) return null;
+  console.log('daa',data)
+
+  return {
+    discoveredClueIds: data.discovered_clue_ids || [],
+    interrogatedSuspectIds: data.interrogated_suspect_ids || [],
+    unlockedHintIds: data.unlocked_hint_ids || [],
+    isCompleted: data.is_completed || false
+  };
+}
+
 export async function createCase(newCase: CrimeCase) {
   const { error } = await supabase
     .from('cases')
@@ -89,11 +115,31 @@ export async function createCase(newCase: CrimeCase) {
   return { error };
 }
 
+export async function saveCaseProgress(userId: string, caseId: string, progress: CaseProgress) {
+  if (!supabase || userId === 'local_user') return { error: { message: 'Cloud sync unavailable' } };
+  console.log('progress',progress)
+  const { error } = await supabase
+    .from('case_progress')
+    .upsert({
+      user_id: userId,
+      case_id: caseId,
+      discovered_clue_ids: progress.discoveredClueIds,
+      interrogated_suspect_ids: progress.interrogatedSuspectIds,
+      unlocked_hint_ids: progress.unlockedHintIds,
+      is_completed: progress.isCompleted,
+      updated_at: new Date()
+    }, { 
+      onConflict: 'user_id,case_id' 
+    });
+    
+  return { error };
+}
+
 export async function getRealtimeLeaderboard() {
    
   const { data } = await supabase
     .from('profiles')
-    .select('name, cases_solved, total_points, full_stats')
+    .select('name, cases_solved, total_points, stats')
     .order('total_points', { ascending: false })
     .limit(10);
   
@@ -103,7 +149,7 @@ export async function getRealtimeLeaderboard() {
       casesSolved: d.cases_solved,
       points: d.total_points,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      badges: (d.full_stats as any)?.badges || []
+      badges: (d.stats as any)?.badges || []
     }));
   }
   return [];

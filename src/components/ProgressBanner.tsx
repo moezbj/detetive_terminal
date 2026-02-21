@@ -31,7 +31,7 @@ const ProgressBanner = ({
   return (
     <div className="bg-neutral-900/60 border-b border-white/5 p-3 px-8 sticky top-[73px] z-40 backdrop-blur-md">
       <div
-        className={`max-w-6xl mx-auto flex items-center justify-between gap-6 ${isRTL ? "flex-row-reverse" : ""}`}
+        className={`max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-6 ${isRTL ? "flex-row-reverse" : ""}`}
       >
         <div
           className={`flex items-center gap-6 flex-1 ${isRTL ? "flex-row-reverse" : ""}`}
