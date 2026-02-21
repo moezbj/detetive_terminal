@@ -42,7 +42,10 @@ const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
   });
   const pay = async () => {
     if (!user?.stats) return null;
-    if (user.stats.cases_played.includes(caseData.id)) navigate("file");
+    if (user.stats.cases_played.includes(caseData.id)) {
+      navigate("file");
+      return;
+    }
     const isStillSpent = user.stats.total_points >= 300;
     if (!isStillSpent) return "Not enough points";
     const newCase = await payForCase(
@@ -65,24 +68,25 @@ const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
       <div className="absolute inset-0 z-0">
         <img
           src={caseData.backgroundImage}
+          loading="lazy"
           className="w-full h-full object-cover blur-md scale-110 brightness-[0.2]"
         />
       </div>
       <div className="relative z-10 max-w-4xl text-center space-y-12 animate-fadeIn">
-        <h1 className="text-5xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-serif font-bold tracking-tighter text-white leading-none">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-serif font-bold tracking-tighter text-white leading-none">
           {caseData.title}
         </h1>
-        <p className="text-2xl text-gray-500 font-serif italic leading-relaxed">
+        <p className="text-lg sm:text-xl md:text-2xl text-gray-500 font-serif italic leading-relaxed">
           "{caseData.teaser}"
         </p>
         <div className="flex flex-col items-center gap-8">
           <div className="flex items-center gap-4">
             <button
               onClick={start}
-              className={`flex items-center gap-4 bg-white/10 px-8 py-3 rounded-full ${speechStatus === "started" ? "animate-pulse" : ""}`}
+              className={`flex items-center gap-4 bg-white/10 px-6 py-2 rounded-full ${speechStatus === "started" ? "animate-pulse" : ""}`}
             >
               <i className="fa-solid fa-volume-high text-red-600"></i>
-              <span className="text-[10px] font-black uppercase text-white">
+              <span className="text-xs font-black uppercase text-white">
                 Listen to Briefing
               </span>
             </button>
@@ -95,7 +99,7 @@ const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
           </div>
           <button
             onClick={() => pay()}
-            className="px-16 py-5 bg-red-700 hover:bg-red-600 text-white font-black rounded-2xl uppercase tracking-widest shadow-2xl"
+            className="px-10 py-3 bg-red-700 hover:bg-red-600 text-white text-sm font-black rounded-xl uppercase tracking-widest shadow-xl"
           >
             Access File
           </button>
@@ -334,26 +338,26 @@ const CaseView: React.FC = () => {
         <div className="bg-neutral-900/80 border-b border-white/5 p-4 flex flex-wrap justify-center gap-2 md:gap-4 sticky top-[73px] z-20 backdrop-blur-md">
           <Link
             to={`/case/${caseId}/file`}
-            className={`text-[10px] font-black uppercase px-4 py-2 rounded transition-all ${window.location.pathname.endsWith("/file") ? "text-white bg-red-950/50" : "text-gray-500 hover:text-white"}`}
+            className={`text-xs font-black uppercase px-4 py-2 rounded transition-all ${window.location.pathname.endsWith("/file") ? "text-white bg-red-950/50" : "text-gray-500 hover:text-white"}`}
           >
             File
           </Link>
 
           <Link
             to={`/case/${caseId}/evidence`}
-            className={`text-[10px] font-black uppercase px-4 py-2 rounded transition-all ${window.location.pathname.endsWith("/evidence") ? "text-white bg-red-950/50" : "text-gray-500 hover:text-white"}`}
+            className={`text-xs font-black uppercase px-4 py-2 rounded transition-all ${window.location.pathname.endsWith("/evidence") ? "text-white bg-red-950/50" : "text-gray-500 hover:text-white"}`}
           >
             Evidence
           </Link>
           <Link
             to={`/case/${caseId}/interrogate`}
-            className={`text-[10px] font-black uppercase px-4 py-2 rounded transition-all ${window.location.pathname.endsWith("/interrogate") ? "text-white bg-red-950/50" : "text-gray-500 hover:text-white"}`}
+            className={`text-xs font-black uppercase px-4 py-2 rounded transition-all ${window.location.pathname.endsWith("/interrogate") ? "text-white bg-red-950/50" : "text-gray-500 hover:text-white"}`}
           >
             Interrogate
           </Link>
           <Link
             to={`/case/${caseId}/accusation`}
-            className="text-[10px] font-black uppercase text-white bg-red-700 px-6 py-2 rounded shadow-lg hover:bg-red-600 transition-all"
+            className="text-xs font-black uppercase text-white bg-red-700 px-6 py-2 rounded shadow-lg hover:bg-red-600 transition-all"
           >
             Verdict
           </Link>
@@ -457,9 +461,9 @@ const CaseView: React.FC = () => {
           path="interrogate"
           element={
             <div
-              className={`flex flex-col md:flex-row h-[calc(100vh-220px)] animate-fadeIn p-4 gap-4 ${isRTL ? "md:flex-row-reverse" : ""}`}
-            >
-              <div className="w-full md:w-80 space-y-4 overflow-y-auto no-scrollbar">
+                className={`flex flex-col md:flex-row h-[calc(100vh-180px)] sm:h-[calc(100vh-220px)] animate-fadeIn p-4 gap-4 ${isRTL ? "md:flex-row-reverse" : ""}`}
+              >
+              <div className="w-full md:w-96 space-y-4 overflow-y-auto no-scrollbar">
                 {currentCase.suspects.map((s) => (
                   <button
                     key={s.id}
@@ -559,9 +563,7 @@ const CaseView: React.FC = () => {
         <Route
           path="evidence"
           element={
-            <div
-              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 animate-fadeIn py-12 ${isRTL ? "flex-row-reverse" : ""}`}
-            >
+            <div className="max-w-6xl mx-auto p-6 md:p-12 animate-fadeIn">
               {currentCase.clues.map((clue) => {
                 const isFound = progress?.discoveredClueIds.includes(clue.id);
                 return (
@@ -576,16 +578,16 @@ const CaseView: React.FC = () => {
                       <i className={`fa-solid ${clue.icon} text-[15rem]`}></i>
                     </div>
                     <div
-                      className={`w-32 h-32 rounded-full flex items-center justify-center mb-8 transition-all duration-700 ${isFound ? "bg-red-950/30 text-red-600 border border-red-600/30 group-hover:scale-110" : "bg-neutral-950 text-gray-800"}`}
+                      className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full flex items-center justify-center mb-8 transition-all duration-700 ${isFound ? "bg-red-950/30 text-red-600 border border-red-600/30 group-hover:scale-110" : "bg-neutral-950 text-gray-800"}`}
                     >
                       <i className={`fa-solid ${clue.icon} text-5xl`}></i>
                     </div>
                     {isFound ? (
                       <div className="space-y-4 relative z-10">
-                        <h3 className="text-3xl font-serif font-bold text-white uppercase tracking-tighter">
+                        <h3 className="text-xl sm:text-3xl font-serif font-bold text-white uppercase tracking-tighter">
                           {clue.title}
                         </h3>
-                        <p className="text-gray-500 text-lg leading-relaxed italic line-clamp-2">
+                        <p className="text-gray-500 text-sm sm:text-lg leading-relaxed italic line-clamp-2">
                           "{clue.description}"
                         </p>
                         <button className="mt-4 px-6 py-2 bg-red-700 text-white rounded-full text-[8px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
@@ -631,10 +633,10 @@ const CaseView: React.FC = () => {
                       <i className="fa-solid fa-skull-crossbones"></i>
                     )}
                   </div>
-                  <h2 className="text-5xl font-serif font-bold text-white uppercase">
+                  <h2 className="text-3xl sm:text-5xl font-serif font-bold text-white uppercase">
                     {verdict.correct ? "Case Resolved" : "Trial Failed"}
                   </h2>
-                  <div className="bg-black/40 p-8 rounded-2xl text-gray-300 font-serif text-xl italic leading-relaxed">
+                  <div className="bg-black/40 p-8 rounded-2xl text-gray-300 font-serif text-lg sm:text-xl italic leading-relaxed">
                     {verdict.feedback}
                   </div>
                   <button
@@ -647,7 +649,7 @@ const CaseView: React.FC = () => {
               ) : (
                 <div className="bg-neutral-900 border border-white/5 p-12 rounded-[3rem] space-y-12 shadow-2xl">
                   <div className="text-center space-y-2">
-                    <h2 className="text-5xl font-serif font-bold text-white uppercase tracking-tighter">
+                    <h2 className="text-3xl sm:text-5xl font-serif font-bold text-white uppercase tracking-tighter">
                       Deliver Verdict
                     </h2>
                     <p className="text-gray-500 italic">

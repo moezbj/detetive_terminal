@@ -104,6 +104,7 @@ const Lobby: React.FC = () => {
                   <img
                     src={c.backgroundImage}
                     alt={c.title}
+                    loading="lazy"
                     className="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent"></div>
