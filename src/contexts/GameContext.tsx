@@ -10,8 +10,14 @@ import type {
   CrimeCase,
   Language,
   Message,
+  UserStats,
 } from "../types.ts";
-import { getCases, saveProfile, saveCaseProgress } from "../../supabaseService";
+import {
+  getCases,
+  saveProfile,
+  saveCaseProgress,
+  dailyClaim,
+} from "../../supabaseService";
 import { GameContext } from "./GameContextExports";
 
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -30,7 +36,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     const saved = localStorage.getItem("detective_user");
     return saved ? JSON.parse(saved) : null;
   });
-
   const setLang = (l: Language) => {
     setLangState(l);
     localStorage.setItem("detective_lang", l);
@@ -48,10 +53,34 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [user]);
 
-  /**
-   * Comprehensive cloud sync that updates both full profile
-   * and specific case progress entries in the database.
-   */
+  const canClaimDailyIntel = useMemo(() => {
+    if (!user?.stats?.lastDailyIntelClaim) return true; // Never claimed before
+
+    const lastClaim = new Date(user.stats.lastDailyIntelClaim).getTime();
+    const now = new Date().getTime();
+    const hoursSinceLastClaim = (now - lastClaim) / (1000 * 60 * 60); // Convert to hours
+
+    return hoursSinceLastClaim >= 24;
+  }, [user?.stats?.lastDailyIntelClaim]);
+
+  const claimDailyIntel = useCallback(async () => {
+    if (!canClaimDailyIntel) return;
+    if (!user) return null;
+
+    const claimSuccess = await dailyClaim(
+      user.id,
+      user.stats,
+      user.stats.id,
+      user?.stats.total_points + 300,
+    );
+    if (claimSuccess.success) {
+      setUser({
+        ...user,
+        stats: claimSuccess.data as UserStats,
+      });
+    }
+  }, [canClaimDailyIntel, user]);
+
   const syncCaseToCloud = useCallback(async () => {
     if (!user) return undefined;
 
@@ -114,6 +143,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       chatHistory,
       setChatHistory,
       syncCaseToCloud,
+      claimDailyIntel,
+      canClaimDailyIntel,
     }),
     [
       user,
@@ -124,6 +155,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       chatHistory,
       syncToCloud,
       syncCaseToCloud,
+      claimDailyIntel,
+      canClaimDailyIntel,
     ],
   );
 

@@ -87,18 +87,46 @@ export async function payForCase(
   const lastCases = Array.isArray(prevData.cases_played)
     ? prevData.cases_played
     : [];
-  const { error, data } = await supabase.from("user_stats").upsert({
-    ...prevData,
-    id: statsId,
-    user_id: userId,
-    cases_played: [...lastCases, caseId],
-    total_points: total_points,
-  });
+  const { error, data } = await supabase
+    .from("user_stats")
+    .upsert({
+      ...prevData,
+      id: statsId,
+      user_id: userId,
+      cases_played: [...lastCases, caseId],
+      total_points: total_points,
+    })
+    .select()
+    .single();
   if (error) {
     return `Error updating user stats:, ${error}`;
   }
+  return data;
+}
+export async function dailyClaim(
+  userId: string,
+  prevData: UserStats,
+  statsId: string,
+  total_points: number,
+): Promise<{ success: boolean; error: string; data: UserStats | null }> {
+  const today = new Date().toISOString();
+
+  const { error, data } = await supabase
+    .from("user_stats")
+    .upsert({
+      ...prevData,
+      id: statsId,
+      user_id: userId,
+      total_points: total_points,
+      lastDailyIntelClaim: today,
+    })
+    .select()
+    .single();
+  if (error) {
+    return { success: false, error: error.message, data: null };
+  }
   console.log("data", data);
-  return "updated";
+  return { success: true, error: "", data: data };
 }
 
 export async function getCases(): Promise<CrimeCase[]> {

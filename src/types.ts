@@ -68,6 +68,7 @@ export interface UserStats {
   rank: string;
   cases_played: string[];
   case_progress: Record<string, CaseProgress>;
+  lastDailyIntelClaim?: string;
 }
 
 export interface User {

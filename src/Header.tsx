@@ -4,7 +4,7 @@ import { useGame } from "./hooks/useGame";
 import { UI_TEXT } from "../translations";
 
 const Header: React.FC = () => {
-  const { user, lang, setLang, logout } = useGame();
+  const { user, lang, setLang, logout, claimDailyIntel, canClaimDailyIntel } = useGame();
   const t = UI_TEXT[lang];
   const isRTL = lang === "ar";
   return (
@@ -28,16 +28,37 @@ const Header: React.FC = () => {
             </h1>
           </Link>
 
-         {user && <Link
-            to="/shop"
-            className={`flex items-center gap-3 bg-neutral-900/50 px-4 py-1.5 rounded-full border border-white/10 hover:bg-neutral-800 transition-all ${isRTL ? "flex-row-reverse" : ""}`}
-          >
-            <i className="fa-solid fa-database text-yellow-500 text-xs"></i>
-            <span className="text-xs font-mono text-yellow-500 font-bold">
-              {user?.stats?.total_points}
-              <span className="text-gray-600 ml-1">{t.intel}</span>
-            </span>
-          </Link>}
+          {user && (
+            <Link
+              to="/shop"
+              className={`flex items-center gap-3 bg-neutral-900/50 px-4 py-1.5 rounded-full border border-white/10 hover:bg-neutral-800 transition-all ${isRTL ? "flex-row-reverse" : ""}`}
+            >
+              <i className="fa-solid fa-database text-yellow-500 text-xs"></i>
+              <span className="text-xs font-mono text-yellow-500 font-bold">
+                {user?.stats?.total_points}
+                <span className="text-gray-600 ml-1">{t.intel}</span>
+              </span>
+            </Link>
+          )}
+          {canClaimDailyIntel ? (
+            <button
+              onClick={() => claimDailyIntel()}
+              className="flex items-center gap-2 bg-red-900/20 px-3 py-1.5 rounded-full border border-red-900/50 hover:bg-red-900/40 transition-all group"
+              title="+300 Intel"
+            >
+              <i className="fa-solid fa-gift text-red-500 text-[10px] animate-bounce"></i>
+              <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">
+                {t.dailyReward}
+              </span>
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 bg-neutral-900/20 px-3 py-1.5 rounded-full border border-white/5 opacity-50">
+              <i className="fa-solid fa-calendar-check text-gray-600 text-[10px]"></i>
+              <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest">
+                {t.claimed}
+              </span>
+            </div>
+          )}
 
           <div
             className={`flex gap-1 sm:gap-2 bg-neutral-900/40 p-1 rounded-lg border border-white/5 ${isRTL ? "flex-row-reverse" : ""}`}
@@ -73,7 +94,7 @@ const Header: React.FC = () => {
             className="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-red-500 transition-colors"
           >
             <i className="fa-solid fa-ranking-star text-sm sm:text-base"></i>
-            </Link>
+          </Link>
           {user && (
             <Link
               to="/profile"
@@ -101,7 +122,6 @@ const Header: React.FC = () => {
               {t.sync}
             </Link>
           )}
-          
         </div>
       </div>
     </nav>

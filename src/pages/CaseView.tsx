@@ -67,7 +67,6 @@ const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
       caseData.id,
       user?.stats.total_points - DifficultyCost[caseData.difficulty],
     );
-    console.log("newCase", newCase, user);
     if (newCase === "updated") {
       await getUserStats(user.id).then((res) => {
         setUser({ ...user, stats: res.data });

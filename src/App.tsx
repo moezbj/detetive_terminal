@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { GameProvider } from './contexts/GameContext';
 
 import Header from './Header';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Lazy load pages for performance
 const Lobby = React.lazy(() => import('./pages/Lobby'));
@@ -78,8 +79,8 @@ const AppContent: React.FC = () => {
               <Route path="/" element={<Lobby />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<Admin />} />
-              <Route path="/case/:caseId/*" element={<CaseView />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/case/:caseId/*" element={<ProtectedRoute><CaseView /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="/shop" element={<Shop />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="*" element={<Navigate to="/" />} />

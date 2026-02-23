@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGame } from "../hooks/useGame";
 import { UI_TEXT } from "../../translations";
@@ -13,14 +13,14 @@ const Lobby: React.FC = () => {
   const t = UI_TEXT[lang];
   const isRTL = lang === "ar";
 
-  const freeSlotsRemaining = useMemo(() => {
+  /* const freeSlotsRemaining = useMemo(() => {
     if (!user) return 0;
     const freePlayed = user.stats?.cases_played?.filter((id) => {
       const c = cases.find((cc) => cc.id === id);
       return c?.accessLevel === "Free";
     }).length;
     return Math.max(0, 2 - freePlayed);
-  }, [user, cases]);
+  }, [user, cases]); */
   const renderColor = (type: string) => {
     let c = "";
     switch (type) {
@@ -68,11 +68,11 @@ const Lobby: React.FC = () => {
         <p className="text-gray-500 font-serif italic text-2xl max-w-2xl mx-auto">
           {t.lobbySubtitle}
         </p>
-        {!user?.isPremium && (
+        {/* {!user?.isPremium && (
           <p className="text-xs text-yellow-600 font-mono uppercase tracking-widest pt-4">
             Free Access Slots: {freeSlotsRemaining}
           </p>
-        )}
+        )} */}
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">

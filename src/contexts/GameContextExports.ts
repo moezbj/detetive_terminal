@@ -10,6 +10,8 @@ export interface GameContextType {
   setLang: (lang: Language) => void;
   syncToCloud: () => Promise<void>;
   syncCaseToCloud: () => Promise<void>;
+  claimDailyIntel: () => void;
+  canClaimDailyIntel: boolean;
   isSyncing: boolean;
   logout: () => Promise<void>;
   chatHistory: Record<string, Message[]>;
