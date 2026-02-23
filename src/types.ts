@@ -1,5 +1,16 @@
 export type SuspectID = string;
-export type AccessLevel = "Free" | "Premium" | "Expert";
+export type AccessLevel = "Free" | "Premium";
+export type Difficulty = "Easy" | "Medium" | "Hard" | "Expert";
+export const DifficultyCost = {
+  Easy: 100,
+  Medium: 200,
+  Hard: 300,
+  Expert: 500,
+} as const;
+
+export type DifficultyCosType =
+  (typeof DifficultyCost)[keyof typeof DifficultyCost];
+
 export type Language = "en" | "ar" | "fr";
 
 export interface Suspect {
@@ -37,7 +48,7 @@ export interface CrimeCase {
   title: string;
   subtitle: string;
   teaser: string;
-  difficulty: "Easy" | "Medium" | "Hard";
+  difficulty: Difficulty;
   backgroundImage: string;
   victim: string;
   description: string;

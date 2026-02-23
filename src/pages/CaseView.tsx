@@ -17,8 +17,9 @@ import {
   generateHint,
 } from "../services/geminiService";
 
-import type { CrimeCase, SuspectID, CaseProgress } from "../types";
+import { type CrimeCase, type SuspectID, type CaseProgress, DifficultyCost } from "../types";
 import ClueDetailModal from "../Modal/ClueModal";
+import InsufficientIntelModal from "../Modal/InsufficientIntelModal";
 import { UI_TEXT } from "../../translations";
 import ProgressBanner from "../components/ProgressBanner";
 import { getUserStats, payForCase } from "../../supabaseService";
@@ -26,6 +27,7 @@ import { getUserStats, payForCase } from "../../supabaseService";
 const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
   const navigate = useNavigate();
   const { user, setUser } = useGame();
+  const [showInsufficientIntel, setShowInsufficientIntel] = useState(false);
 
   const { speechStatus, start, pause, stop } = useSpeech({
     text: caseData.teaser,
@@ -46,14 +48,24 @@ const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
       navigate("file");
       return;
     }
-    const isStillSpent = user.stats.total_points >= 300;
-    if (!isStillSpent) return "Not enough points";
+    const isStillSpent =
+      caseData.difficulty === "Hard"
+        ? user.stats.total_points >= 300
+        : caseData.difficulty === "Medium"
+          ? user.stats.total_points >= 200
+          : caseData.difficulty === "Easy"
+            ? user.stats.total_points >= 100
+            : false;
+    if (!isStillSpent) {
+      setShowInsufficientIntel(true);
+      return;
+    }
     const newCase = await payForCase(
       user.id,
       user.stats,
       user.stats.id,
       caseData.id,
-      user?.stats.total_points - 300,
+      user?.stats.total_points - DifficultyCost[caseData.difficulty],
     );
     console.log("newCase", newCase, user);
     if (newCase === "updated") {
@@ -101,10 +113,21 @@ const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
             onClick={() => pay()}
             className="px-10 py-3 bg-red-700 hover:bg-red-600 text-white text-sm font-black rounded-xl uppercase tracking-widest shadow-xl"
           >
-            Access File
+            Access File {caseData.difficulty === "Hard"
+                        ? "(300 intel)"
+                        : caseData.difficulty === "Medium"
+                          ? "(200 intel)"
+                          : caseData.difficulty === "Easy"
+                            ? "(100 intel)"
+                            : ""}
           </button>
         </div>
       </div>
+      {showInsufficientIntel && (
+        <InsufficientIntelModal
+          setShowInsufficientIntel={setShowInsufficientIntel}
+        />
+      )}
     </div>
   );
 };
@@ -461,8 +484,8 @@ const CaseView: React.FC = () => {
           path="interrogate"
           element={
             <div
-                className={`flex flex-col md:flex-row h-[calc(100vh-180px)] sm:h-[calc(100vh-220px)] animate-fadeIn p-4 gap-4 ${isRTL ? "md:flex-row-reverse" : ""}`}
-              >
+              className={`flex flex-col md:flex-row h-[calc(100vh-180px)] sm:h-[calc(100vh-220px)] animate-fadeIn p-4 gap-4 ${isRTL ? "md:flex-row-reverse" : ""}`}
+            >
               <div className="w-full md:w-96 space-y-4 overflow-y-auto no-scrollbar">
                 {currentCase.suspects.map((s) => (
                   <button

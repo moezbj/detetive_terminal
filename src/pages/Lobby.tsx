@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useGame } from "../hooks/useGame";
 import { UI_TEXT } from "../../translations";
 import PaywallModal from "../Modal/PaywallModal";
+import ComingSoonModal from "../Modal/ComingSoonModal";
 
 const Lobby: React.FC = () => {
   const { cases, isCasesLoading, lang, user } = useGame();
   const navigate = useNavigate();
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showComingSoon, setShowComingSoon] = useState(false);
   const t = UI_TEXT[lang];
   const isRTL = lang === "ar";
 
@@ -77,26 +79,28 @@ const Lobby: React.FC = () => {
         {cases
           .sort((a, b) => b.difficulty.localeCompare(a.difficulty))
           .map((c) => {
-            const isSolved = user?.stats?.case_progress ? user?.stats?.case_progress[c.id]?.isCompleted : false;
+            const isSolved = user?.stats?.case_progress
+              ? user?.stats?.case_progress[c.id]?.isCompleted
+              : false;
             return (
               <div
                 key={c.id}
                 onClick={() => {
-                  if (!user?.isPremium && c.accessLevel !== "Free") {
-                    /*   const isAlreadyStarted = user?.stats.cases_played.includes(
-                      c.id,
-                    );
-                   s
-
-                    if (
-                      c.accessLevel !== "Free" ||
-                      (!isAlreadyStarted && freeSlotsRemaining <= 0)
-                    ) {
-                      return;
-                    } */
-                    setShowPaywall(true);
+                  const isAlreadyStarted = user?.stats.cases_played.includes(
+                    c.id,
+                  );
+                  if (!user) {
+                    navigate("/auth");
                   }
-                  navigate(`/case/${c.id}`);
+                  if (
+                    !user?.isPremium &&
+                    c.accessLevel === "Premium" &&
+                    !isAlreadyStarted
+                  ) {
+                    setShowComingSoon(true);
+                  } else {
+                    navigate(`/case/${c.id}`);
+                  }
                 }}
                 className="group case-card relative overflow-hidden rounded-[2rem] border border-white/5 bg-neutral-900 cursor-pointer transition-all duration-700 hover:border-red-600/30"
               >
@@ -123,7 +127,14 @@ const Lobby: React.FC = () => {
                       {t.difficulty}: {c.difficulty}
                     </span>
                     <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">
-                      {c.accessLevel}
+                      {c.accessLevel}{" "}
+                      {c.difficulty === "Hard"
+                        ? "(300 intel)"
+                        : c.difficulty === "Medium"
+                          ? "(200 intel)"
+                          : c.difficulty === "Easy"
+                            ? "(100 intel)"
+                            : ""}
                     </span>
                   </div>
                   <h3 className="text-3xl font-serif font-bold text-white leading-tight mb-2 group-hover:text-red-600 transition-colors">
@@ -138,6 +149,9 @@ const Lobby: React.FC = () => {
           })}
       </div>
       {showPaywall && <PaywallModal setShowPaywall={setShowPaywall} />}
+      {showComingSoon && (
+        <ComingSoonModal setShowComingSoon={setShowComingSoon} />
+      )}
     </div>
   );
 };

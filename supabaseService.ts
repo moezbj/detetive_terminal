@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { CrimeCase } from "./src/types";
-import type { CaseProgress, UserStats } from "./types";
+import type { CaseProgress, UserStats } from "./src/types";
 
 // Assuming these are injected via environment or handled by the platform
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
