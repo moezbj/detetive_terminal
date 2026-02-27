@@ -148,7 +148,7 @@ class NLPEvaluationService {
     const keywordScore = this.calculateKeywordScore(userData, solutionData);
     const entityScore = this.calculateEntityScore(userData, solutionData);
     const narrativeScore = this.calculateNarrativeScore(userData, solutionData);
-    const temporalScore = this.calculateTemporalScore(userData, solutionData, caseData);
+    const temporalScore = this.calculateTemporalScore(userData, caseData);
 
     // Weighted total score
     const totalScore = 
@@ -552,7 +552,6 @@ class NLPEvaluationService {
    */
   private calculateTemporalScore(
     userData: ProcessedText, 
-    solutionData: ProcessedText,
     caseData: CrimeCase
   ): number {
     // Check if user mentioned any timeline events
