@@ -15,14 +15,13 @@ const PaywallModal = ({ setShowPaywall }: paywallModal) => {
     console.log("plan", plan);
     setIsCheckoutLoading(true);
     setTimeout(() => {
-      //setUser((prev: any) => ({ ...prev, isPremium: true }));
       setIsCheckoutLoading(false);
       setShowPaywall(false);
     }, 2000);
   };
   return (
-    <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 animate-fadeIn">
-      <div className="max-w-4xl w-full bg-neutral-900/50 border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl relative">
+    <div className="fixed inset-0 z-100 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 animate-fadeIn">
+      <div className="max-w-4xl w-full bg-neutral-900/50 border border-white/10 rounded-4xl overflow-hidden shadow-2xl relative">
         {isCheckoutLoading && (
           <div className="absolute inset-0 z-10 bg-black/80 flex flex-col items-center justify-center space-y-4">
             <div className="w-12 h-12 border-4 border-yellow-600 border-t-transparent rounded-full animate-spin"></div>
@@ -48,7 +47,7 @@ const PaywallModal = ({ setShowPaywall }: paywallModal) => {
             <div
               className={`grid grid-cols-1 md:grid-cols-2 gap-8 ${isRTL ? "flex-row-reverse" : ""}`}
             >
-              <div className="p-6 sm:p-10 rounded-[2rem] border border-white/5 bg-black/40 space-y-8 flex flex-col justify-between">
+              <div className="p-6 sm:p-10 rounded-4xl border border-white/5 bg-black/40 space-y-8 flex flex-col justify-between">
                 <div>
                   <h3 className="text-2xl font-bold text-white mb-2">
                     Monthly Intel
@@ -86,7 +85,7 @@ const PaywallModal = ({ setShowPaywall }: paywallModal) => {
                 </div>
               </div>
 
-              <div className="p-6 sm:p-10 rounded-[2rem] border border-yellow-600/30 bg-yellow-600/5 space-y-8 flex flex-col justify-between relative">
+              <div className="p-6 sm:p-10 rounded-4xl border border-yellow-600/30 bg-yellow-600/5 space-y-8 flex flex-col justify-between relative">
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-600 text-black text-[8px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter">
                   Best Value
                 </span>

@@ -1,8 +1,8 @@
 /* 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import  type { SuspectID, Message, CrimeCase, CaseProgress, Language } from "../../types";
+import  type { SuspectID, Message, CrimeCase, CaseProgress, Language } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY });
 
 export async function interrogateSuspect(
   currentCase: CrimeCase,
@@ -84,7 +84,7 @@ export async function generateHint(
     Solution: ${currentCase.solutionSecret}
     
     Progress so far:
-    - Found Clues: ${progress.discoveredClueIds.join(', ')}
+    - Found Clues: ${progress.discovered_clue_ids.join(', ')}
     - Interrogated Suspects: ${progress.interrogatedSuspectIds.join(', ')}
     
     Based on what is MISSING, provide a CRYPTIC hint. Do NOT give away the answer directly.
@@ -144,14 +144,14 @@ export async function evaluateAccusation(
   } catch (e) {
     return { correct: false, feedback: "Error processing verdict." };
   }
-}
- */
+} */
+
 import type {
   SuspectID,
   CrimeCase,
   CaseProgress,
   Language,
-} from "../../types";
+} from "../types";
 
 // Local deterministic response templates
 const responses: Record<string, Record<string, string[]>> = {
@@ -311,7 +311,7 @@ export async function generateHint(
 ): Promise<string> {
   const missingClues = currentCase.clues
     .map((c) => c.id)
-    .filter((id) => !progress.discoveredClueIds.includes(id));
+    .filter((id) => !progress.discovered_clue_ids.includes(id));
 
   const missingSuspects = currentCase.suspects
     .map((s) => s.id)

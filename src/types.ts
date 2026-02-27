@@ -36,7 +36,7 @@ export interface TimelineEntry {
 }
 
 export interface CaseProgress {
-  discoveredClueIds: string[];
+  discovered_clue_ids: string[];
   interrogatedSuspectIds: SuspectID[];
   unlockedHintIds: string[];
   isCompleted: boolean;
@@ -62,7 +62,7 @@ export interface CrimeCase {
 
 export interface UserStats {
   id: string;
-  cases_solved: number;
+  cases_solved: string[];
   total_points: number;
   badges: string[];
   rank: string;
@@ -81,7 +81,7 @@ export interface User {
 
 export interface LeaderboardEntry {
   name: string;
-  cases_solved: number;
+  cases_solved: string[];
   points: number;
   badges: string[];
 }
@@ -89,6 +89,32 @@ export interface LeaderboardEntry {
 export interface Message {
   role: "user" | "model";
   text: string;
+}
+export interface EvaluationResult {
+  correct: boolean;
+  score: number;
+  confidence: number;
+  feedback: {
+    type: 'brilliant' | 'correct' | 'partial' | 'incorrect';
+    message: string;
+    tone: 'celebratory' | 'positive' | 'encouraging' | 'constructive';
+  };
+  details: {
+    suspectMatch: boolean;
+    semanticScore: number;
+    keywordScore: number;
+    entityScore: number;
+    narrativeScore: number;
+    temporalScore: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    keyPhrases?: any;
+    matchedConcepts?: Array<{
+      type: string;
+      name: string;
+      similarity: number;
+    }>;
+    missingConcepts?: string[];
+  };
 }
 
 export type GameView =

@@ -5,24 +5,30 @@ import {
   useParams,
   useNavigate,
   Link,
-  Navigate,
   useLocation,
 } from "react-router-dom";
 import { useSpeech } from "react-text-to-speech";
 import { useGame } from "../hooks/useGame";
 
-import {
-  interrogateSuspect,
-  evaluateAccusation,
-  generateHint,
-} from "../services/geminiService";
+import { interrogateSuspect, generateHint } from "../services/geminiService";
+import NLPEvaluationService from "../services/NLPEvaluationService";
 
-import { type CrimeCase, type SuspectID, type CaseProgress, DifficultyCost } from "../types";
+import {
+  type CrimeCase,
+  type SuspectID,
+  type CaseProgress,
+  DifficultyCost,
+} from "../types";
 import ClueDetailModal from "../Modal/ClueModal";
 import InsufficientIntelModal from "../Modal/InsufficientIntelModal";
 import { UI_TEXT } from "../../translations";
 import ProgressBanner from "../components/ProgressBanner";
-import { getUserStats, payForCase } from "../../supabaseService";
+import {
+  caseSolve,
+  getUserStats,
+  payForCase,
+  getCaseProgress,
+} from "../../supabaseService";
 
 const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
   const navigate = useNavigate();
@@ -42,6 +48,8 @@ const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
     highlightMode: "word",
     enableDirectives: true,
   });
+  const isPlayed = user?.stats.cases_played.includes(caseData.id);
+  console.log("isPlayed", isPlayed);
   const pay = async () => {
     if (!user?.stats) return null;
     if (user.stats.cases_played.includes(caseData.id)) {
@@ -60,6 +68,7 @@ const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
       setShowInsufficientIntel(true);
       return;
     }
+
     const newCase = await payForCase(
       user.id,
       user.stats,
@@ -67,7 +76,8 @@ const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
       caseData.id,
       user?.stats.total_points - DifficultyCost[caseData.difficulty],
     );
-    if (newCase === "updated") {
+
+    if (newCase) {
       await getUserStats(user.id).then((res) => {
         setUser({ ...user, stats: res.data });
       });
@@ -112,13 +122,15 @@ const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
             onClick={() => pay()}
             className="px-10 py-3 bg-red-700 hover:bg-red-600 text-white text-sm font-black rounded-xl uppercase tracking-widest shadow-xl"
           >
-            Access File {caseData.difficulty === "Hard"
-                        ? "(300 intel)"
-                        : caseData.difficulty === "Medium"
-                          ? "(200 intel)"
-                          : caseData.difficulty === "Easy"
-                            ? "(100 intel)"
-                            : ""}
+            Access File
+            {!isPlayed &&
+              (caseData.difficulty === "Hard"
+                ? "(300 intel)"
+                : caseData.difficulty === "Medium"
+                  ? "(200 intel)"
+                  : caseData.difficulty === "Easy"
+                    ? "(100 intel)"
+                    : "")}
           </button>
         </div>
       </div>
@@ -133,6 +145,8 @@ const CaseIntro: React.FC<{ caseData: CrimeCase }> = ({ caseData }) => {
 
 const CaseView: React.FC = () => {
   const { caseId } = useParams();
+  const navigate = useNavigate();
+
   const location = useLocation();
   const {
     cases,
@@ -155,7 +169,12 @@ const CaseView: React.FC = () => {
 
   const [verdict, setVerdict] = useState<{
     correct: boolean;
-    feedback: string;
+
+    feedback: {
+      type: "correct" | "brilliant" | "partial" | "incorrect";
+      message: string;
+      suggestions?: string[] | undefined;
+    };
   } | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -165,25 +184,21 @@ const CaseView: React.FC = () => {
     [cases, caseId],
   );
 
-  const progress = useMemo(() => {
-    if (!user || !currentCase)
-      return {
-        discoveredClueIds: [],
-        interrogatedSuspectIds: [],
-        isCompleted: false,
-        unreadClueIds: [],
-        unlockedHintIds: [],
-      };
-    return user.stats?.case_progress
-      ? user.stats?.case_progress[currentCase.id]
-      : {
-          discoveredClueIds: [],
-          interrogatedSuspectIds: [],
-          isCompleted: false,
-          unreadClueIds: [],
-          unlockedHintIds: [],
-        };
-  }, [user, currentCase]);
+  const [progress, setProgress] = useState<CaseProgress | null>(null);
+  useEffect(() => {
+    if (!currentCase) {
+      setProgress(null);
+      return;
+    }
+    let active = true;
+    (async () => {
+      const res = await getCaseProgress(currentCase.id);
+      if (active) setProgress(res);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [currentCase, user?.id]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -199,21 +214,21 @@ const CaseView: React.FC = () => {
     );
 
   const discoverClue = (clueId: string) => {
-    if (!progress?.discoveredClueIds.includes(clueId)) {
+    if (!progress?.discovered_clue_ids?.includes(clueId)) {
       updateProgress({
-        discoveredClueIds: [...(progress?.discoveredClueIds || []), clueId],
+        discovered_clue_ids: [...(progress?.discovered_clue_ids || []), clueId],
       });
     }
     setSelectedClueId(clueId);
   };
   const updateProgress = async (updates: Partial<CaseProgress>) => {
     if (user && currentCase.id) {
-      await setUser((prev) => {
+      setUser((prev) => {
         if (!prev) return null;
         const currentCaseProgress = prev.stats?.case_progress
           ? prev.stats?.case_progress[currentCase.id]
           : {
-              discoveredClueIds: [],
+              discovered_clue_ids: [],
               interrogatedSuspectIds: [],
               isCompleted: false,
               unreadClueIds: [],
@@ -253,16 +268,16 @@ const CaseView: React.FC = () => {
     if (!progress?.interrogatedSuspectIds?.includes(activeSuspect)) {
       updateProgress({
         interrogatedSuspectIds: [
-          ...(progress.interrogatedSuspectIds || []),
+          ...(progress?.interrogatedSuspectIds || []),
           activeSuspect,
         ],
       });
     }
-
     try {
       const reply = await interrogateSuspect(
         currentCase,
         activeSuspect,
+
         currentInput,
       );
       setChatHistory((prev) => ({
@@ -276,36 +291,19 @@ const CaseView: React.FC = () => {
     }
   };
 
-  const submitAccusation = async (suspectId: string, theory: string) => {
+  const submitAccusation = async (suspectId: string, conclusion: string) => {
     setIsLoading(true);
-    try {
-      const res = await evaluateAccusation(
-        currentCase,
-        suspectId,
-        theory,
-        lang,
-      );
-      setVerdict(res);
-      if (res.correct) {
-        updateProgress({ isCompleted: true });
-
-        setUser((prev) => {
-          if (!prev) return null;
-          return {
-            ...prev,
-            stats: {
-              ...prev.stats,
-              cases_solved: prev.stats.cases_solved + 1,
-              total_points:
-                prev.stats.total_points +
-                (currentCase.difficulty === "Hard" ? 1200 : 600),
-            },
-          };
-        });
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
+    const result = await NLPEvaluationService.evaluateConclusion(
+      suspectId,
+      conclusion,
+      currentCase,
+    );
+    //setEvaluation(result);
+    setVerdict({ correct: result.correct, feedback: result.feedback });
+    if (result.correct && user) {
+      // Handle successful solve
+      await caseSolve(user.id, user.stats, user.stats.id, currentCase.id);
+      await updateProgress({ isCompleted: true });
       setIsLoading(false);
     }
   };
@@ -314,7 +312,7 @@ const CaseView: React.FC = () => {
     if (!currentCase || !progress || isLoading || !user) return;
     const hintCost = user.isPremium ? 50 : 250;
     if (user.stats.total_points < hintCost) {
-      Navigate({ to: "/shop" });
+      navigate("/shop");
       return;
     }
 
@@ -338,6 +336,7 @@ const CaseView: React.FC = () => {
       setIsLoadingHint(false);
     }
   };
+
   const showTab =
     location.pathname.endsWith("/file") ||
     location.pathname.endsWith("/interrogate") ||
@@ -386,7 +385,7 @@ const CaseView: React.FC = () => {
         </div>
       )}
       {activeHint && (
-        <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-50 max-w-2xl w-[90%] bg-red-950/95 backdrop-blur-2xl border border-red-500/50 p-12 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.9)] animate-fadeIn">
+        <div className="fixed top-24 inset-x-4 z-50 max-w-2xl mx-auto bg-red-950/95 backdrop-blur-2xl border border-red-500/50 p-12 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.9)] animate-fadeIn">
           <div
             className={`flex justify-between items-center mb-8 ${isRTL ? "flex-row-reverse" : ""}`}
           >
@@ -437,7 +436,7 @@ const CaseView: React.FC = () => {
                 </p>
               </div>
 
-              <div className="bg-neutral-900/40 p-8 md:p-12 rounded-[2rem] border border-white/5 shadow-2xl space-y-8">
+              <div className="bg-neutral-900/40 p-8 md:p-12 rounded-4xl border border-white/5 shadow-2xl space-y-8">
                 <h3 className="text-xl font-black text-gray-500 uppercase tracking-widest border-b border-white/5 pb-4">
                   Incident Report
                 </h3>
@@ -454,10 +453,12 @@ const CaseView: React.FC = () => {
                   {currentCase.suspects.map((s) => (
                     <div
                       key={s.id}
-                      className="p-8 bg-neutral-900 border border-white/5 rounded-[2rem] flex gap-8 items-center group hover:border-red-600/30 transition-all"
+                      className="p-8 bg-neutral-900 border border-white/5 rounded-4xl flex gap-8 items-center group hover:border-red-600/30 transition-all"
                     >
                       <img
-                        src={"src/assets/icon.png"}
+                        src={
+                          "https://plus.unsplash.com/premium_vector-1760140437338-0929e77d84f8?q=80&w=2050&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                        }
                         className="w-24 h-24 rounded-2xl object-cover grayscale group-hover:grayscale-0 transition-all shadow-xl"
                         alt={s.name}
                       />
@@ -512,7 +513,7 @@ const CaseView: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex-1 bg-neutral-900 rounded-[2rem] border border-white/5 flex flex-col overflow-hidden relative shadow-inner">
+              <div className="flex-1 bg-neutral-900 rounded-4xl border border-white/5 flex flex-col overflow-hidden relative shadow-inner">
                 {!activeSuspect ? (
                   <div className="flex-1 flex flex-col items-center justify-center opacity-20 p-12 text-center">
                     <i className="fa-solid fa-microphone-slash text-6xl mb-6"></i>
@@ -587,7 +588,9 @@ const CaseView: React.FC = () => {
           element={
             <div className="max-w-6xl mx-auto p-6 md:p-12 animate-fadeIn">
               {currentCase.clues.map((clue) => {
-                const isFound = progress?.discoveredClueIds.includes(clue.id);
+                const isFound = progress?.discovered_clue_ids?.includes(
+                  clue.id,
+                );
                 return (
                   <div
                     key={clue.id}
@@ -659,10 +662,19 @@ const CaseView: React.FC = () => {
                     {verdict.correct ? "Case Resolved" : "Trial Failed"}
                   </h2>
                   <div className="bg-black/40 p-8 rounded-2xl text-gray-300 font-serif text-lg sm:text-xl italic leading-relaxed">
-                    {verdict.feedback}
+                    {verdict.feedback.message}
+                  </div>
+                  <div className="bg-black/40 p-8 rounded-2xl text-gray-300 font-serif text-lg sm:text-xl italic leading-relaxed">
+                    {verdict.feedback.suggestions?.map((s, index) => (
+                      <div key={index}>{s}</div>
+                    ))}
                   </div>
                   <button
-                    onClick={() => setVerdict(null)}
+                    onClick={() =>
+                      verdict.correct
+                        ? setVerdict(null)
+                        : navigate(`/case/${caseId}`)
+                    }
                     className="px-10 py-4 bg-white/5 border border-white/10 text-gray-500 hover:text-white rounded-xl uppercase font-black text-[10px]"
                   >
                     Back to Evidence

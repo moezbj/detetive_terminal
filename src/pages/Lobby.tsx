@@ -79,8 +79,8 @@ const Lobby: React.FC = () => {
         {cases
           .sort((a, b) => b.difficulty.localeCompare(a.difficulty))
           .map((c) => {
-            const isSolved = user?.stats?.case_progress
-              ? user?.stats?.case_progress[c.id]?.isCompleted
+            const isSolved = user?.stats
+              ? user?.stats?.cases_solved.includes(c.id)
               : false;
             return (
               <div
@@ -102,16 +102,16 @@ const Lobby: React.FC = () => {
                     navigate(`/case/${c.id}`);
                   }
                 }}
-                className="group case-card relative overflow-hidden rounded-[2rem] border border-white/5 bg-neutral-900 cursor-pointer transition-all duration-700 hover:border-red-600/30"
+                className="group case-card relative overflow-hidden rounded-4xl border border-white/5 bg-neutral-900 cursor-pointer transition-all duration-700 hover:border-red-600/30"
               >
-                <div className="aspect-[4/5] overflow-hidden">
+                <div className="aspect-4/5 overflow-hidden">
                   <img
                     src={c.backgroundImage}
                     alt={c.title}
                     loading="lazy"
                     className="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent"></div>
+                  <div className="absolute inset-0 bg-linear-to-t from-neutral-950 via-neutral-950/40 to-transparent"></div>
                   {isSolved && (
                     <div className="absolute top-6 right-6 bg-green-500 text-black px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-2xl">
                       <i className="fa-solid fa-check-double mr-2"></i>{" "}

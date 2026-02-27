@@ -4,7 +4,7 @@ import { UI_TEXT } from "../../translations";
 
 interface Progress {
   currentCase: CrimeCase;
-  currentProgress: CaseProgress;
+  currentProgress: CaseProgress | null;
   requestHint: () => void;
   isLoadingHint: boolean;
 }
@@ -21,13 +21,15 @@ const ProgressBanner = ({
 
   const totalItems = currentCase.suspects.length + currentCase.clues.length;
   const completedItems =
-      (currentProgress.interrogatedSuspectIds?.length ?? 0) +
-      (currentProgress.discoveredClueIds?.length ?? 0);
+      (currentProgress?.interrogatedSuspectIds?.length ?? 0) +
+      (currentProgress?.discovered_clue_ids?.length ?? 0);
   const percentage =
     totalItems === 0 ? 0 : Math.round((completedItems / totalItems) * 100);
    
 
-
+const isSolved = user?.stats
+              ? user?.stats?.cases_solved.includes(currentCase.id)
+              : false;
 
   return (
     <div className="bg-neutral-900/60 border-b border-white/5 p-3 px-8 sticky top-[73px] z-40 backdrop-blur-md">
@@ -43,12 +45,12 @@ const ProgressBanner = ({
             </span>
             <div className="w-64 h-1 bg-neutral-800 rounded-full overflow-hidden">
               <div
-                className="h-full bg-red-600 transition-all duration-1000 shadow-[0_0_10px_rgba(220,38,38,0.5)]"
+                className={`h-full  transition-all duration-1000 shadow-[0_0_10px_rgba(220,38,38,0.5)] ${isSolved ? "bg-green-600" : "bg-red-600"}`}
                 style={{ width: `${percentage}%` }}
               ></div>
             </div>
           </div>
-          <span className="text-xs font-mono text-red-600 font-bold">
+          <span className={`text-xs font-mono text-${isSolved ? "green" : "red"}-600 font-bold`}>
             {percentage}%
           </span>
         </div>

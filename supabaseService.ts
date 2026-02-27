@@ -32,19 +32,19 @@ export async function getProfile(userId: string) {
     .select("*")
     .eq("id", userId)
     .maybeSingle();
-  console.log("erro ", error);
   return { data, error };
 }
 
 function getDefaultUserStats(): UserStats {
   return {
     id: "",
-    cases_solved: 0,
+    cases_solved: [],
     total_points: 1000,
     badges: [],
     rank: "Detective Trainee",
     cases_played: [],
     case_progress: {},
+    lastDailyIntelClaim: new Date().toISOString(),
   };
 }
 
@@ -72,6 +72,7 @@ export async function getUserStats(userId: string) {
     rank: data.rank,
     cases_played: data.cases_played,
     case_progress: data.case_progress,
+    lastDailyIntelClaim: data.lastDailyIntelClaim,
   };
 
   return { data: userStats, error: null };
@@ -103,6 +104,47 @@ export async function payForCase(
   }
   return data;
 }
+export async function caseSolve(
+  userId: string,
+  prevData: UserStats,
+  statsId: string,
+  caseId: string,
+): Promise<UserStats | string> {
+  const lastCases = Array.isArray(prevData.cases_solved)
+    ? prevData.cases_solved
+    : [];
+  const { error, data } = await supabase
+    .from("user_stats")
+    .upsert({
+      id: statsId,
+      user_id: userId,
+      cases_solved: [...lastCases, caseId],
+    })
+    .select()
+    .single();
+
+  if (error) {
+    return `Error updating user stats:, ${error}`;
+  }
+  const { error: progressError } = await supabase
+    .from("case_progress")
+    .upsert(
+      {
+        user_id: userId,
+        case_id: caseId,
+        is_completed: true,
+      },
+      {
+        onConflict: "user_id,case_id",
+      },
+    )
+    .select()
+    .single();
+  if (progressError) {
+    return `Error updating case isCompleted:, ${progressError}`;
+  }
+  return data;
+}
 export async function dailyClaim(
   userId: string,
   prevData: UserStats,
@@ -125,7 +167,6 @@ export async function dailyClaim(
   if (error) {
     return { success: false, error: error.message, data: null };
   }
-  console.log("data", data);
   return { success: true, error: "", data: data };
 }
 
@@ -161,7 +202,6 @@ export async function getCases(): Promise<CrimeCase[]> {
 }
 
 export async function getCaseProgress(
-  userId: string,
   caseId: string,
 ): Promise<CaseProgress | null> {
   if (!supabase) return null;
@@ -169,18 +209,23 @@ export async function getCaseProgress(
   const { data, error } = await supabase
     .from("case_progress")
     .select("*")
-    .eq("user_id", userId)
     .eq("case_id", caseId)
     .single();
 
-  if (error || !data) return null;
-  console.log("daa", data);
+  if (error || !data)
+    return {
+      discovered_clue_ids: [],
+      interrogatedSuspectIds: [],
+      isCompleted: false,
+      unreadClueIds: [],
+      unlockedHintIds: [],
+    };
 
   return {
-    discoveredClueIds: data.discovered_clue_ids || [],
-    interrogatedSuspectIds: data.interrogated_suspect_ids || [],
-    unlockedHintIds: data.unlocked_hint_ids || [],
-    isCompleted: data.is_completed || false,
+    discovered_clue_ids: data.discovered_clue_ids,
+    interrogatedSuspectIds: data.interrogated_suspect_ids,
+    unlockedHintIds: data.unlocked_hint_ids,
+    isCompleted: data.is_completed,
   };
 }
 
@@ -215,7 +260,7 @@ export async function saveCaseProgress(
     {
       user_id: userId,
       case_id: caseId,
-      discovered_clue_ids: progress.discoveredClueIds,
+      discovered_clue_ids: progress.discovered_clue_ids,
       interrogated_suspect_ids: progress.interrogatedSuspectIds,
       unlocked_hint_ids: progress.unlockedHintIds,
       is_completed: progress.isCompleted,

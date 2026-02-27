@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { useGame } from "../hooks/useGame";
 
 interface InsufficientIntelModalProps {
@@ -10,8 +10,8 @@ const InsufficientIntelModal = ({ setShowInsufficientIntel }: InsufficientIntelM
   const isRTL = lang === "ar";
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 animate-fadeIn">
-      <div className="max-w-md w-full bg-neutral-900/50 border border-white/10 rounded-[2rem] shadow-2xl relative">
+    <div className="fixed inset-0 z-100 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 animate-fadeIn">
+      <div className="max-w-md w-full bg-neutral-900/50 border border-white/10 rounded-4xl shadow-2xl relative">
         <div className="p-6 md:p-12 space-y-8 text-center">
           <div className="inline-block px-4 py-1 bg-red-600/10 border border-red-600/30 rounded-full text-red-600 text-[10px] font-black uppercase tracking-[0.3em]">
             Access Denied

@@ -1,5 +1,5 @@
 
-import type { Language } from './types';
+import type { Language } from './src/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const UI_TEXT: Record<Language, any> = {

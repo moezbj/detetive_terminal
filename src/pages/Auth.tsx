@@ -59,7 +59,7 @@ const Auth: React.FC = () => {
 
   return (
     <div className="h-screen flex items-center justify-center">
-      <div className="max-w-md w-full p-12 bg-neutral-900 border border-white/5 rounded-[2rem] shadow-2xl">
+      <div className="max-w-md w-full p-12 bg-neutral-900 border border-white/5 rounded-4xl shadow-2xl">
         <h2 className="text-4xl font-serif font-bold text-white text-center mb-8">
           Access Terminal
         </h2>

@@ -4,7 +4,7 @@ import { useGame } from "./hooks/useGame";
 import { UI_TEXT } from "../translations";
 
 const Header: React.FC = () => {
-  const { user, lang, setLang, logout, claimDailyIntel, canClaimDailyIntel } = useGame();
+  const { user, lang, /* setLang, */ logout, claimDailyIntel, canClaimDailyIntel } = useGame();
   const t = UI_TEXT[lang];
   const isRTL = lang === "ar";
   return (
@@ -60,7 +60,7 @@ const Header: React.FC = () => {
             </div>
           )}
 
-          <div
+          {/* <div
             className={`flex gap-1 sm:gap-2 bg-neutral-900/40 p-1 rounded-lg border border-white/5 ${isRTL ? "flex-row-reverse" : ""}`}
           >
             {["en", "fr", "ar"].map((l) => (
@@ -73,7 +73,7 @@ const Header: React.FC = () => {
                 {l}
               </button>
             ))}
-          </div>
+          </div> */}
         </div>
 
         <div

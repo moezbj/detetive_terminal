@@ -23,7 +23,7 @@ const ClueDetailModal = ({
   const isRTL = lang === "ar";
 
   return (
-    <div className="fixed  inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-6 animate-fadeIn">
+    <div className="fixed  inset-0 z-[100px] bg-black/90 backdrop-blur-md flex items-center justify-center p-6 animate-fadeIn">
       <div
         className={`max-w-2xl w-full bg-neutral-900 border border-white/5 rounded-[3rem] overflow-hidden shadow-2xl relative ${isRTL ? "text-right" : ""}`}
       >
